@@ -1,0 +1,19 @@
+{
+  "name": "copilot",
+  "version": "0.0.0",
+  "homepage": ".",
+  "authors": [
+    "Joseph Finlayson <joseph.finlayson@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "pure": "~0.6.0"
+  }
+}
