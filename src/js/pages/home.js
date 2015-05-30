@@ -4,22 +4,21 @@
 
 import React from 'react';
 import _ from 'lodash';
+
+import Router from 'react-router';
 // import injectTapEventPlugin from 'react-tap-event-plugin';
 
 // injectTapEventPlugin();
+
+var Link = Router.Link;
 
 var Minis = React.createClass({
   handleClick(event) {
     const el = event.target,
           activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
-    // console.log(`tapped ${el.textContent}`);
-    // if (confirm(`Do you want to ACTIVATE ${el.textContent}?`)) {
-      // console.log('YES');
-      activated.push(el.textContent);
-      localStorage.setItem('activated-mini-apps', JSON.stringify(activated));
-      el.parentNode.classList.add('activated');
-      // console.log(activated);
-    // }
+    activated.push(el.textContent);
+    localStorage.setItem('activated-mini-apps', JSON.stringify(activated));
+    el.parentNode.classList.add('activated');
   },
   _touch: {
     // started
@@ -32,19 +31,15 @@ var Minis = React.createClass({
         this._touch.started = Date.now();
       } else if (type === 'touchend') {
         const duration = this._touch.started && now - this._touch.started;
-        // console.log(duration);
         event.preventDefault();
         event.stopPropagation();
         if (duration > 300) {
-          // if (confirm(`Do you want to REMOVE ${el.textContent}?`)) {
-            const activated = () => JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
-            localStorage.setItem(
-              'activated-mini-apps',
-              JSON.stringify(_.without(activated(), el.textContent))
-            );
-            el.parentNode.classList.remove('activated');
-            // console.log(activated());
-          // }
+          const activated = () => JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
+          localStorage.setItem(
+            'activated-mini-apps',
+            JSON.stringify(_.without(activated(), el.textContent))
+          );
+          el.parentNode.classList.remove('activated');
         } else if (duration > 0) {
           return this.handleClick(event);
         }
@@ -57,10 +52,20 @@ var Minis = React.createClass({
   },
   render() {
     const minis = this.props.minis;
+
     return (
       <div>
-        {_.chunk(minis, 2).map((minis2, i) => (
-          <div key={i} className="row minis">
+        {_.chunk(minis, 2).map((minis2, i) => {
+          const link0 = minis[i*2].route ?
+            <Link to={minis[i*2].route}
+                  className="col"
+                  onTouchStart={this.touch}
+                  onTouchEnd={this.touch}
+                  onTouchCancel={this.touch}
+                  onTouchMove={this.touch}>
+              <div className="vert-helper"></div>
+              <img src={`build/img/icon-${i*2+1}.png`}/>
+            </Link> :
             <div className="col"
                  onTouchStart={this.touch}
                  onTouchEnd={this.touch}
@@ -68,7 +73,17 @@ var Minis = React.createClass({
                  onTouchMove={this.touch}>
               <div className="vert-helper"></div>
               <img src={`build/img/icon-${i*2+1}.png`}/>
-            </div>
+            </div>;
+          const link1 = minis[i*2+1].route ?
+            <Link to={minis[i*2].route}
+                  className="col"
+                  onTouchStart={this.touch}
+                  onTouchEnd={this.touch}
+                  onTouchCancel={this.touch}
+                  onTouchMove={this.touch}>
+              <div className="vert-helper"></div>
+              <img src={`build/img/icon-${i*2+2}.png`}/>
+            </Link> :
             <div className="col"
                  onTouchStart={this.touch}
                  onTouchEnd={this.touch}
@@ -76,9 +91,14 @@ var Minis = React.createClass({
                  onTouchMove={this.touch}>
               <div className="vert-helper"></div>
               <img src={`build/img/icon-${i*2+2}.png`}/>
+            </div>;
+          return (
+            <div key={i} className="row minis">
+              {link0}
+              {link1}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   }
@@ -88,29 +108,37 @@ var App = React.createClass({
   render() {
     const minis = [
       {
-        name: 'SOS',
-        logo: ''
-      },{
         name: 'CrimeMapper',
-        logo: ''
+        logo: '',
+        route: 'crimeMapper'
+      },{
+        name: 'SOS',
+        logo: '',
+        route: 'SOS'
       },{
         name: 'example app 3',
-        logo: ''
+        logo: '',
+        route: ''
       },{
         name: 'example app 4',
-        logo: ''
+        logo: '',
+        route: ''
       },{
         name: 'example app 5',
-        logo: ''
+        logo: '',
+        route: ''
       },{
         name: 'example app 6',
-        logo: ''
+        logo: '',
+        route: ''
       },{
         name: 'example app 7',
-        logo: ''
+        logo: '',
+        route: ''
       },{
         name: 'example app 8',
-        logo: ''
+        logo: '',
+        route: ''
       }
     ];
     return (<Minis minis={minis}/>);

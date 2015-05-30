@@ -130,7 +130,7 @@ gulp.task('deployAndroid', ['cordova', 'cleanCordova'], plugins.shell.task([
 ]));
 
 
-gulp.task('deployIOS', ['cordova'], plugins.shell.task([
+gulp.task('deployIOS', ['cordova', 'cleanCordova'], plugins.shell.task([
   'cd cordova; cordova run ios'
 ]));
 

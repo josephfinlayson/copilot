@@ -8,7 +8,7 @@ import React from 'react';
 import homePage from './pages/home';
 import settingsPage from './pages/settings';
 import crimeMapper from './pages/map';
-import crimeAlarm from './pages/alarm';
+import SOS from './pages/alarm';
 
 //router
 import Router from 'react-router';
@@ -29,19 +29,18 @@ var App = React.createClass({
                 <div className="bar-positive bar bar-header disable-user-behavior">
                     <div className="buttons">
                         <Link to="settings">
-
-                        <button className="button">Settings Icon</button>
-                            </Link>
+                          <button className="button">Settings Icon</button>
+                        </Link>
                     </div>
+
                     <h1 className="title">Ionic Styled header bar</h1>
 
+                </div>
+                <div className="scroll-content ionic-scroll">
+                    <div className="scroll">
+                        <RouteHandler/>
                     </div>
-                    <div className="scroll-content ionic-scroll">
-                        <div className="scroll">
-                            <RouteHandler/>
-                        </div>
-                    </div>
-
+                </div>
             </div>
         )
     }
@@ -52,7 +51,7 @@ var routes = (
     <DefaultRoute handler={homePage} />
     <Route name="about" handler={settingsPage} />
     <Route path="map" name="crimeMapper" handler={crimeMapper} />
-    <Route name="crimeAlarm" handler={crimeAlarm} />
+    <Route name="SOS" handler={SOS} />
 
     <Route name="settings"
         handler={settingsPage}
