@@ -156,6 +156,12 @@ gulp.task('css', function() {
     .on('error', plugins.util.log);
 });
 
+// img
+gulp.task('css', function() {
+  return gulp.src('./src/img/**')
+    .pipe(gulp.dest('./build/img'))
+});
+
 // Copy index.html to 'dist'
 gulp.task('html', function() {
   gulp.src(['./index.html'])
