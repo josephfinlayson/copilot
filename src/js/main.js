@@ -20,7 +20,7 @@ var Route = Router.Route,
     NotFoundRoute = Router.NotFoundRoute,
     Redirect = Router.Redirect,
     RouteHandler = Router.RouteHandler,
-    Link = Router.Link
+    Link = Router.Link;
 
 var App = React.createClass({
     render() {
