@@ -13,7 +13,7 @@ export default React.createClass({
         }
     },
     confirmServiceRequest() {
-        var self=this;
+        var self = this;
         let postInfo = this.getServiceRequestDetails();
         postInfo.then(function (fulfilledPost) {
             return $.when($.post('https://aai-api.com/api/serviceOrders?apiKey=' + window.allianzAPIKey, fulfilledPost))
@@ -102,6 +102,7 @@ export default React.createClass({
         this.setState({modalIsOpen: true});
     },
     render() {
+        console.log(this.state.appointmentConfirmation);
         if (!this.state.appointmentConfirmation) {
             var modalContents = <div className="scroll">
                 <h2>{this.state.assistanceInfo.header}</h2>
@@ -126,6 +127,20 @@ export default React.createClass({
                     </button>
                 </div>
             </div>;
+        } else {
+            var modalContents = <div className="scroll">
+                    <h2>Success</h2>
+                    You have an appointment
+                        <span>{' ' + this.state.appointmentConfirmation.status}</span>
+                    with an Allianz professional on
+                    <span>{' ' + this.state.appointmentConfirmation.appointmentDate}</span>
+                <div>
+                <button onClick={this.closeModal}
+                        className="button">
+                        Close
+                    </button>
+                    </div>
+                </div>
         }
         return (
             <div>
