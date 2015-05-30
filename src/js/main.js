@@ -2,6 +2,7 @@
 'use strict';
 
 import React from 'react';
+import injectTapEventPlugin from 'react-tap-event-plugin';
 
 //pages
 import homePage from './pages/home';
@@ -11,6 +12,8 @@ import crimeAlarm from './pages/alarm';
 
 //router
 import Router from 'react-router';
+
+injectTapEventPlugin();
 
 var Route = Router.Route,
     DefaultRoute = Router.DefaultRoute,
@@ -44,8 +47,6 @@ var routes = (
     <Route name="crimeAlarm" handler={crimeAlarm} />
 </Route>
 );
-
-React.initializeTouchEvents(true)
 
 Router.run(routes, function (Handler) {
     React.render(<Handler />, document.querySelector('#app'));
