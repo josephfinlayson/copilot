@@ -23388,8 +23388,12 @@ System.register("build/js/main", ["npm:react@0.13.3", "build/js/pages/home", "bu
       Route = Router.Route, DefaultRoute = Router.DefaultRoute, NotFoundRoute = Router.NotFoundRoute, Redirect = Router.Redirect, RouteHandler = Router.RouteHandler, Link = Router.Link;
       App = React.createClass({
         displayName: "App",
+        mixins: [Router.Navigation],
         render: function() {
-          return (React.createElement("div", null, React.createElement("div", {className: "bar-positive bar bar-header disable-user-behavior"}, React.createElement("div", {className: "buttons"}, React.createElement(Link, {to: "settings"}, React.createElement("button", {className: "button"}, "Settings Icon"))), React.createElement("h1", {className: "title"}, "Ionic Styled header bar")), React.createElement("div", {className: "scroll-content ionic-scroll"}, React.createElement("div", {className: "scroll"}, React.createElement(RouteHandler, null)))));
+          return (React.createElement("div", null, React.createElement("div", {className: "bar-positive bar bar-header disable-user-behavior"}, React.createElement(Link, {to: "settings"}, React.createElement("button", {className: "button button-icon icon ion-navicon-round"})), React.createElement("h1", {className: "title"}, "CoPilot"), React.createElement("button", {
+            className: "button button-clear button-light",
+            onClick: this.goBack
+          }, "Back")), React.createElement("div", {className: "scroll-content ionic-scroll"}, React.createElement("div", {className: "scroll"}, React.createElement(RouteHandler, null)))));
         }
       });
       routes = (React.createElement(Route, {
