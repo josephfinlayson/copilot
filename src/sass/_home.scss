@@ -1,18 +1,19 @@
 .minis {
   img {
-    width: 100%;
-    padding: 3em;
+    width: 60% !important;
+    padding: 2em;
     vertical-align: center;
   }
-  .vert-helper {
-    display: inline-block;
-    width: 0;
-    height: 100%;
-  }
+  // .vert-helper {
+  //   display: inline-block;
+  //   width: 0;
+  //   height: 100%;
+  // }
 }
 
 .activated {
-  background-color: cornflowerblue;
+  -webkit-transition: backround-color 0.2s;
+  background-color: lighten(#40606D, 50%) !important;
 }
 
 .scroll {

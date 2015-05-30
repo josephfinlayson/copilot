@@ -12,95 +12,78 @@ import Router from 'react-router';
 
 var Link = Router.Link;
 
+const isActivated = name => {
+  const activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
+  console.log(activated, name, !!~activated.indexOf(name));
+  return ~activated.indexOf(name);
+};
+
 var Minis = React.createClass({
-  handleClick(event) {
-    const el = event.target,
-          activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
-    activated.push(el.textContent);
-    localStorage.setItem('activated-mini-apps', JSON.stringify(activated));
-    el.parentNode.classList.add('activated');
+  handleClick(name) {
+    const activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
+    if (isActivated(name)) {
+      console.log('INCLUDES');
+    } else {
+      activated.push(name);
+      localStorage.setItem('activated-mini-apps', JSON.stringify(activated));
+      document.querySelector('.'+_.kebabCase(name)).classList.add('activated');
+    }
   },
   _touch: {
     // started
   },
-  touch(event) {
+  touch(event, name) {
     const now = Date.now(),
-          el = event.target,
           type = event.type;
-      if (type === 'touchstart') {
-        this._touch.started = Date.now();
-      } else if (type === 'touchend') {
-        const duration = this._touch.started && now - this._touch.started;
-        event.preventDefault();
-        event.stopPropagation();
-        if (duration > 300) {
-          const activated = () => JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
-          localStorage.setItem(
-            'activated-mini-apps',
-            JSON.stringify(_.without(activated(), el.textContent))
-          );
-          el.parentNode.classList.remove('activated');
-        } else if (duration > 0) {
-          return this.handleClick(event);
-        }
-        delete this._touch.started;
-      } else if (type === 'touchcancel') {
-        delete this._touch.started;
-      } else if (type === 'touchmove') {
-        delete this._touch.started;
+    if (type === 'touchstart') {
+      this._touch.started = Date.now();
+    } else if (type === 'touchend') {
+      const duration = this._touch.started && now - this._touch.started;
+      event.preventDefault();
+      event.stopPropagation();
+      if (duration > 300) {
+        const activated = () => JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
+        localStorage.setItem(
+          'activated-mini-apps',
+          JSON.stringify(_.without(activated(), name))
+        );
+        document.querySelector('.'+_.kebabCase(name)).classList.remove('activated');
+      } else if (duration > 0) {
+        return this.handleClick(name);
       }
+      delete this._touch.started;
+    } else if (type === 'touchcancel') {
+      delete this._touch.started;
+    } else if (type === 'touchmove') {
+      delete this._touch.started;
+    }
   },
   render() {
     const minis = this.props.minis;
+    return (<div>
+      {minis.map((mini, i) => {
+        const shouldBeActivated = isActivated(mini.name);
+        const handle = event => this.touch(event, mini.name);
 
-    return (
-      <div>
-        {_.chunk(minis, 2).map((minis2, i) => {
-          const link0 = minis[i*2].route ?
-            <Link to={minis[i*2].route}
-                  className="col"
-                  onTouchStart={this.touch}
-                  onTouchEnd={this.touch}
-                  onTouchCancel={this.touch}
-                  onTouchMove={this.touch}>
-              <div className="vert-helper"></div>
-              <img src={`build/img/icon-${i*2+1}.png`}/>
-            </Link> :
-            <div className="col"
-                 onTouchStart={this.touch}
-                 onTouchEnd={this.touch}
-                 onTouchCancel={this.touch}
-                 onTouchMove={this.touch}>
-              <div className="vert-helper"></div>
-              <img src={`build/img/icon-${i*2+1}.png`}/>
-            </div>;
-          const link1 = minis[i*2+1].route ?
-            <Link to={minis[i*2].route}
-                  className="col"
-                  onTouchStart={this.touch}
-                  onTouchEnd={this.touch}
-                  onTouchCancel={this.touch}
-                  onTouchMove={this.touch}>
-              <div className="vert-helper"></div>
-              <img src={`build/img/icon-${i*2+2}.png`}/>
-            </Link> :
-            <div className="col"
-                 onTouchStart={this.touch}
-                 onTouchEnd={this.touch}
-                 onTouchCancel={this.touch}
-                 onTouchMove={this.touch}>
-              <div className="vert-helper"></div>
-              <img src={`build/img/icon-${i*2+2}.png`}/>
-            </div>;
-          return (
-            <div key={i} className="row minis">
-              {link0}
-              {link1}
+        return (
+          <div className="card minis"
+               onTouchStart={handle}
+               onTouchEnd={handle}
+               onTouchCancel={handle}
+               onTouchMove={handle}
+               key={i}>
+            <div className={
+              "item item-image" + (shouldBeActivated ? " activated" : "") + " " + _.kebabCase(mini.name)
+            }>
+              <img src={`build/img/icon-${i+1}.png`}/>
             </div>
-          );
-        })}
-      </div>
-    );
+            <div className="item item-divider">
+              {mini.name}
+            </div>
+          </div>
+        );
+      })}
+    </div>);
   }
 });
 
