@@ -10,13 +10,18 @@ import attachFastClick from 'fastclick';
 import homePage from './pages/home';
 import settingsPage from './pages/settings';
 import crimeMapper from './pages/map';
+import crimeAlarm from './pages/alarm';
+import health from './pages/health';
 import SOS from './pages/alarm';
 
 //router
 import Router from 'react-router';
+import Modal from 'react-modal';
+
+Modal.setAppElement(document.querySelector('#app'));
 
 // injectTapEventPlugin();
-attachFastClick();
+attachFastClick(document.body);
 
 var Route = Router.Route,
     DefaultRoute = Router.DefaultRoute,
@@ -26,16 +31,22 @@ var Route = Router.Route,
     Link = Router.Link;
 
 var App = React.createClass({
-    mixins: [Router.Navigation],
+    mixins: [Router.Navigation, Router.State],
     render() {
+      const isHome = this.getPathname() === '/';
+      const goSettings = _.partial(this.transitionTo, 'settings');
       return (
         <div>
           <div className="bar-dark bar bar-header disable-user-behavior">
-            <button className="button button-clear" onClick={this.goBack}>〈 Back</button>
+            <button className="button button-clear" onClick={
+              isHome ? goSettings : this.goBack
+            }>{
+              isHome ? '☰' : '〈 Back'
+            }</button>
 
             <h1 className="title">CoPilot</h1>
 
-            <button className="button button-clear"
+            <button className="button button-clear button-SOS"
                     onClick={_.partial(this.transitionTo, 'settings')}>SOS</button>
           </div>
           <div className="scroll-content ionic-scroll">
@@ -53,8 +64,9 @@ var routes = (
     <DefaultRoute handler={homePage} />
     <Route name="about" handler={settingsPage} />
     <Route path="map" name="crimeMapper" handler={crimeMapper} />
+    <Route name="crimeAlarm" handler={crimeAlarm} />
+    <Route name="health" path="health" handler={health} />
     <Route name="SOS" handler={SOS} />
-
     <Route name="settings"
         handler={settingsPage}
         path="/settings" />

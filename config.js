@@ -14,10 +14,14 @@ System.config({
     "jquery": "github:components/jquery@2.1.4",
     "lodash": "npm:lodash@3.9.3",
     "react": "npm:react@0.13.3",
+    "react-modal": "npm:react-modal@0.2.0",
     "react-router": "npm:react-router@0.13.3",
     "react-tap-event-plugin": "npm:react-tap-event-plugin@0.1.7",
     "traceur": "github:jmcriffey/bower-traceur@0.0.88",
     "traceur-runtime": "github:jmcriffey/bower-traceur-runtime@0.0.88",
+    "github:jspm/nodelibs-assert@0.1.0": {
+      "assert": "npm:assert@1.3.0"
+    },
     "github:jspm/nodelibs-buffer@0.1.0": {
       "buffer": "npm:buffer@3.2.2"
     },
@@ -42,10 +46,16 @@ System.config({
       "path": "github:jspm/nodelibs-path@0.1.0",
       "process": "github:jspm/nodelibs-process@0.1.1"
     },
+    "npm:assert@1.3.0": {
+      "util": "npm:util@0.10.3"
+    },
     "npm:buffer@3.2.2": {
       "base64-js": "npm:base64-js@0.0.8",
       "ieee754": "npm:ieee754@1.1.5",
       "is-array": "npm:is-array@1.0.1"
+    },
+    "npm:classnames@1.2.2": {
+      "assert": "github:jspm/nodelibs-assert@0.1.0"
     },
     "npm:core-util-is@1.0.1": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0"
@@ -75,6 +85,12 @@ System.config({
     },
     "npm:path-browserify@0.0.0": {
       "process": "github:jspm/nodelibs-process@0.1.1"
+    },
+    "npm:react-modal@0.2.0": {
+      "classnames": "npm:classnames@1.2.2",
+      "fs": "github:jspm/nodelibs-fs@0.1.2",
+      "path": "github:jspm/nodelibs-path@0.1.0",
+      "react": "npm:react@0.13.3"
     },
     "npm:react-router@0.13.3": {
       "object-assign": "npm:object-assign@2.0.0",
