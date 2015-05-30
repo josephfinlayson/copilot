@@ -42,7 +42,7 @@ var App = React.createClass({
 
 	getCrimeMap() {
 		var self = this;
-		console.log(this.state.crimeApiURLRoot);
+		// console.log(this.state.crimeApiURLRoot);
 		var heatmapGradient = [
 			'rgba(248,177,177,0)',
 			'rgba(248,177,177,0)',
@@ -62,11 +62,13 @@ var App = React.createClass({
 			'rgba(194,1,1,1)',
 			'rgba(194,1,1,1)'
 		];
-		console.log('calling api...');
+		// console.log('calling api...');
 		var ApiURL = self.state.crimeApiURLRoot + '?lat=' + self.state.lat + '&lng=' + self.state.lng;
-		console.log(ApiURL);
+		// console.log(ApiURL);
+		$('.map-overlay').show();
 		$.get(ApiURL, function(result) {
-			console.log('done calling api');
+			// console.log('done calling api');
+			$('.map-overlay').hide();
 			if (this.isMounted()) {
 				var map;
 				if (!self.state.map) {
@@ -101,7 +103,7 @@ var App = React.createClass({
 				var pointArray = new google.maps.MVCArray(list);
 				var center = new google.maps.LatLng(self.state.lat,self.state.lng);
 				if (self.state.heatmap) {
-					console.log('removing old heatmap.');
+					// console.log('removing old heatmap.');
 					self.state.heatmap.setMap(null);
 				}
 				var heatmap = new google.maps.visualization.HeatmapLayer({
@@ -109,7 +111,7 @@ var App = React.createClass({
 					data: pointArray,
 					radius: self.state.heatmapRadius
 				});
-				console.log('drawing new heatmap: ');
+				// console.log('drawing new heatmap: ');
 				self.setState({heatmap: heatmap});
 				heatmap.setMap(map);
 				heatmap.set('gradient', heatmapGradient);
@@ -153,7 +155,7 @@ var App = React.createClass({
 					google.maps.event.addListener(self.state.map, 'zoom_changed', function() {
 						var map = self.state.map;
 						var newZoom = map.getZoom();
-						console.log('zoom: ', newZoom);
+						// console.log('zoom: ', newZoom);
 						self.setState({
 							mapZoom: newZoom
 						});
@@ -178,12 +180,20 @@ var App = React.createClass({
 	},
 
 	render() {
-			return (
-					<div>
-							<h1>map</h1>
-							<div id="googleMap"><div className="loading-txt">Loading...<br /><i className="icon ion-loading-d"></i></div></div>
-					</div>
-			)
+		var width = parseInt ($(window).width()) - 40;
+		var height = '500';
+		var mapStyle = {
+			width: width,
+			height: height
+		};
+		return (
+			<div className="map-wrapper">
+				<div className="map-overlay">
+					<div className="loading-txt">Loading...</div>
+				</div>
+				<div id="googleMap" style={mapStyle}></div>
+			</div>
+		)
 	},
 
 	componentDidMount() {

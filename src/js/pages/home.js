@@ -14,25 +14,25 @@ var Link = Router.Link;
 
 const isActivated = name => {
   const activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
-  console.log(activated, name, !!~activated.indexOf(name));
   return ~activated.indexOf(name);
 };
 
 var Minis = React.createClass({
-  handleClick(name) {
+  mixins: [Router.Navigation],
+  handleClick(mini) {
     const activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
-    if (isActivated(name)) {
-      console.log('INCLUDES');
+    if (isActivated(mini.name)) {
+      this.transitionTo(mini.route);
     } else {
-      activated.push(name);
+      activated.push(mini.name);
       localStorage.setItem('activated-mini-apps', JSON.stringify(activated));
-      document.querySelector('.'+_.kebabCase(name)).classList.add('activated');
+      document.querySelector('.'+_.kebabCase(mini.name)).classList.add('activated');
     }
   },
   _touch: {
     // started
   },
-  touch(event, name) {
+  touch(event, mini) {
     const now = Date.now(),
           type = event.type;
     if (type === 'touchstart') {
@@ -45,11 +45,11 @@ var Minis = React.createClass({
         const activated = () => JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
         localStorage.setItem(
           'activated-mini-apps',
-          JSON.stringify(_.without(activated(), name))
+          JSON.stringify(_.without(activated(), mini.name))
         );
-        document.querySelector('.'+_.kebabCase(name)).classList.remove('activated');
+        document.querySelector('.'+_.kebabCase(mini.name)).classList.remove('activated');
       } else if (duration > 0) {
-        return this.handleClick(name);
+        return this.handleClick(mini);
       }
       delete this._touch.started;
     } else if (type === 'touchcancel') {
@@ -60,10 +60,14 @@ var Minis = React.createClass({
   },
   render() {
     const minis = this.props.minis;
+    // <img src={`build/img/icon-${i+1}.png`}/>
     return (<div>
       {minis.map((mini, i) => {
         const shouldBeActivated = isActivated(mini.name);
-        const handle = event => this.touch(event, mini.name);
+        const handle = event => this.touch(event, mini);
+        const divStyle = {
+          backgroundImage: `url(build/img/icon-${i+1}.svg)`
+        };
 
         return (
           <div className="card minis"
@@ -73,12 +77,12 @@ var Minis = React.createClass({
                onTouchMove={handle}
                key={i}>
             <div className={
-              "item item-image" + (shouldBeActivated ? " activated" : "") + " " + _.kebabCase(mini.name)
-            }>
-              <img src={`build/img/icon-${i+1}.png`}/>
-            </div>
-            <div className="item item-divider">
-              {mini.name}
+              "item item-image" +
+              (shouldBeActivated ? " activated" : "") +
+              " " + _.kebabCase(mini.name)
+            } style={divStyle}>
+              <h3>{mini.name}</h3>
+              <p>{mini.description}</p>
             </div>
           </div>
         );
@@ -92,6 +96,7 @@ var App = React.createClass({
     const minis = [
       {
         name: 'CrimeMapper',
+        description: 'Travel safely through an unknown environment',
         logo: '',
         route: 'crimeMapper'
       },{
