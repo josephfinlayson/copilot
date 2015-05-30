@@ -19,6 +19,7 @@ export default React.createClass({
             return $.when($.post('https://aai-api.com/api/serviceOrders?apiKey=' + window.allianzAPIKey, fulfilledPost))
         }).then(function (data) {
             self.setState({'appointmentConfirmation': data})
+            console.log(data);
         })
     },
     getAssistanceType(type) {
@@ -101,7 +102,31 @@ export default React.createClass({
         this.setState({modalIsOpen: true});
     },
     render() {
-
+        if (!this.state.appointmentConfirmation) {
+            var modalContents = <div className="scroll">
+                <h2>{this.state.assistanceInfo.header}</h2>
+                Allianz can assist you anywhere you are.
+                <h5>Service details</h5>
+                <span>
+                            {this.state.assistanceInfo.description}
+                </span>
+                <h5> Service cost</h5>
+                This service costs $
+                <span>{this.state.assistanceInfo.price}</span>
+                .
+                An Allianz service personal will be sent to your location as soon as possible
+                <div>
+                    <button onClick={this.confirmServiceRequest}
+                        className="button button-positive">
+                        Confirm service request
+                    </button>
+                    <button onClick={this.closeModal}
+                        className="button">
+                        Cancel
+                    </button>
+                </div>
+            </div>;
+        }
         return (
             <div>
                 <button onClick={this.openModal}
@@ -112,29 +137,7 @@ export default React.createClass({
                     onRequestClose={this.closeModal}
                 >
                     <div className="padding scroll-content ionic-scroll has-header">
-                        <div className="scroll">
-                            <h2>{this.state.assistanceInfo.header}</h2>
-                            Allianz can assist you anywhere you are.
-                            <h5>Service details</h5>
-                            <span>
-                            {this.state.assistanceInfo.description}
-                            </span>
-                            <h5> Service cost</h5>
-                            This service costs $
-                            <span>{this.state.assistanceInfo.price}</span>
-                            .
-                            An Allianz service personal will be sent to your location as soon as possible
-                            <div>
-                                <button onClick={this.confirmServiceRequest}
-                                    className="button button-positive">
-                                    Confirm service request
-                                </button>
-                                <button onClick={this.closeModal}
-                                    className="button">
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
+                    {modalContents}
                     </div>
                 </Modal >
             </div>
