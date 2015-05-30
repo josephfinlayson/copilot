@@ -45,7 +45,7 @@
 
 .bar-header ~ .scroll-content > .scroll {
   padding-top: 3em;
-  max-height: 100%;
+  height: 100%;
   overflow-y: scroll;
   background-color: #eee;
   -webkit-overflow-scrolling: touch;
