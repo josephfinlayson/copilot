@@ -155,7 +155,7 @@ var App = React.createClass({
 					google.maps.event.addListener(self.state.map, 'zoom_changed', function() {
 						var map = self.state.map;
 						var newZoom = map.getZoom();
-						console.log('zoom: ', newZoom);
+						// console.log('zoom: ', newZoom);
 						self.setState({
 							mapZoom: newZoom
 						});
@@ -180,12 +180,18 @@ var App = React.createClass({
 	},
 
 	render() {
+		var width = parseInt ($(window).width()) - 40;
+		var height = '500';
+		var mapStyle = {
+			width: width,
+			height: height
+		};
 		return (
 			<div className="map-wrapper">
 				<div className="map-overlay">
 					<div className="loading-txt">Loading...</div>
 				</div>
-				<div id="googleMap"></div>
+				<div id="googleMap" style={mapStyle}></div>
 			</div>
 		)
 	},

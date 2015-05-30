@@ -7,11 +7,11 @@ $map-height: 500px;
 
 .map-wrapper {
 	position: relative;
-	width: $map-width;
-	height: $map-height;
-	margin: 0 auto;
+	// width: $map-width;
+	// height: $map-height;
+	margin: 20px;
 	text-align: center;
-	margin-top: 65px;
+	margin-top: 20px;
 	padding: 0;
 }
 
@@ -30,10 +30,10 @@ $map-height: 500px;
 
 #googleMap {
 
-	width: $map-width;
-	height: $map-height;
-	max-width: 100%;
-	background-color: #EDEDED;
+	// width: $map-width;
+	// height: $map-height;
+	// max-width: 100%;
+	// background-color: #EDEDED;
 	margin: 20px auto;
 	text-align: center;
 }
@@ -65,7 +65,7 @@ $map-height: 500px;
 
 .loading-txt {
 	margin: 20px auto;
-	padding: 200px;
+	padding: 200px 20px;
 	font-size: 1.3em;
 }
 
