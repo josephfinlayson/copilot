@@ -2,6 +2,15 @@
 @import "../../bower_components/ionic/scss/ionic";
 @import "home";
 
+
+#sos {
+  @import "../../bower_components/bootstrap/dist/css/bootstrap.css";
+  @import "../../bower_components/jquery-mobile/css/themes/default/jquery.mobile.css";
+}
+.wrapper
+{
+    padding: 61px;
+}
 #googleMap {
   width: 700px;
   height: 500px;

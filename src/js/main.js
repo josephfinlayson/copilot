@@ -13,6 +13,8 @@ import crimeMapper from './pages/map';
 import crimeAlarm from './pages/alarm';
 import health from './pages/health';
 import SOS from './pages/alarm';
+import addContacts from './pages/addContacts';
+import phoneContacts from './pages/phoneContacts';
 
 //router
 import Router from 'react-router';
@@ -60,7 +62,9 @@ var routes = (
     <Route path="map" name="crimeMapper" handler={crimeMapper} />
     <Route name="crimeAlarm" handler={crimeAlarm} />
     <Route name="health" path="health" handler={health} />
-    <Route name="SOS" handler={SOS} />
+    <Route name="SOS" path="sos" handler={SOS} />
+    <Route name="addContacts" path="/sos/addContacts" handler={addContacts} />
+    <Route name="phoneContacts" path="/sos/phoneContacts" handler={phoneContacts} />
     <Route name="settings"
         handler={settingsPage}
         path="/settings" />
