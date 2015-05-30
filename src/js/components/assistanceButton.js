@@ -1,5 +1,5 @@
 //window.allianzAPIKey = "ffd4dedb-69b8-429a-8122-83c52edb632a";
-window.allianzAPIKey ="test-apiKey-1"
+window.allianzAPIKey = "test-apiKey-1"
 import React from 'react';
 import Modal from 'react-modal';
 import $ from 'jquery';
@@ -13,10 +13,13 @@ export default React.createClass({
         }
     },
     confirmServiceRequest() {
+        var self=this;
         let postInfo = this.getServiceRequestDetails();
+        postInfo.then(function (fulfilledPost) {
+            return $.when($.post('https://aai-api.com/api/serviceOrders?apiKey=' + window.allianzAPIKey, fulfilledPost))
+        }).then(function (data) {
 
-        $.when($.post('https://aai-api.com/api/serviceOrders?apiKey=' + window.allianzAPIKey, postInfo)).then(function (data) {
-            console.log(data);
+            self.setState({'appointmentConfirmation', data})
         })
     },
     getAssistanceType(type) {
@@ -77,7 +80,18 @@ export default React.createClass({
             "creditCardValidUntilMonth": 2,
             "creditCardValidUntilYear": 2020
         }
-        return hollowResponse
+        var deferred = $.Deferred();
+
+        navigator.geolocation.getCurrentPosition(
+            function (a) {
+                console.log(a.coords)
+                hollowResponse.appointmentLatitude = a.coords.latitude;
+                hollowResponse.appointmentLongitude = a.coords.longitude;
+                deferred.resolve(hollowResponse);
+            },
+            deferred.reject)
+
+        return deferred.promise();
 
     },
     closeModal() {
