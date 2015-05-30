@@ -33,7 +33,7 @@ var routes = (
 <Route handler={App} path="/">
     <DefaultRoute handler={homePage} />
     <Route name="about" handler={settingsPage} />
-    <Route name="crimeMapper" handler={crimeMapper} />
+    <Route path="map" name="crimeMapper" handler={crimeMapper} />
     <Route name="crimeAlarm" handler={crimeAlarm} />
 </Route>
 
