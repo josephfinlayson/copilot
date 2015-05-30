@@ -1,4 +1,5 @@
-window.allianzAPIKey = "ffd4dedb-69b8-429a-8122-83c52edb632a";
+//window.allianzAPIKey = "ffd4dedb-69b8-429a-8122-83c52edb632a";
+window.allianzAPIKey ="test-apiKey-1"
 import React from 'react';
 import Modal from 'react-modal';
 import $ from 'jquery';
@@ -10,6 +11,13 @@ export default React.createClass({
             modelIsOpen: false,
             assistanceInfo: this.getAssistanceType(this.props.assistanceType) || {}
         }
+    },
+    confirmServiceRequest() {
+        let postInfo = this.getServiceRequestDetails();
+
+        $.when($.post('https://aai-api.com/api/serviceOrders?apiKey=' + window.allianzAPIKey, postInfo)).then(function (data) {
+            console.log(data);
+        })
     },
     getAssistanceType(type) {
         switch (type) {
@@ -53,10 +61,10 @@ export default React.createClass({
                 break;
         }
     },
-    postServiceResponse() {
-
+    getServiceRequestDetails() {
+        let now = new Date();
         var hollowResponse = {
-            "appointmentDate": "2015-05-30T18:53:47.392Z",
+            "appointmentDate": now.toISOString(),
             "appointmentAddress": "string",
             "appointmentLatitude": 0,
             "appointmentLongitude": 0,
@@ -99,7 +107,9 @@ export default React.createClass({
                             {this.state.assistanceInfo.description}
                             </span>
                             <h5> Service cost</h5>
-                            This service costs $<span>{this.state.assistanceInfo.price}</span>.
+                            This service costs $
+                            <span>{this.state.assistanceInfo.price}</span>
+                            .
                             An Allianz service personal will be sent to your location as soon as possible
                             <div>
                                 <button onClick={this.confirmServiceRequest}
