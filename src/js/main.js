@@ -9,9 +9,13 @@ import homePage from './pages/home';
 import settingsPage from './pages/settings';
 import crimeMapper from './pages/map';
 import crimeAlarm from './pages/alarm';
+import health from './pages/health';
 
 //router
 import Router from 'react-router';
+import Modal from 'react-modal';
+
+Modal.setAppElement(document.querySelector('#app'));
 
 // injectTapEventPlugin();
 
@@ -36,7 +40,7 @@ var App = React.createClass({
                     <h1 className="title">Ionic Styled header bar</h1>
 
                     </div>
-                    <div className="scroll-content ionic-scroll">
+                    <div className="scroll-content ionic-scroll has-header">
                         <div className="scroll">
                             <RouteHandler/>
                         </div>
@@ -53,6 +57,7 @@ var routes = (
     <Route name="about" handler={settingsPage} />
     <Route path="map" name="crimeMapper" handler={crimeMapper} />
     <Route name="crimeAlarm" handler={crimeAlarm} />
+    <Route name="health" path="health" handler={health} />
 
     <Route name="settings"
         handler={settingsPage}
