@@ -18,8 +18,7 @@ export default React.createClass({
         postInfo.then(function (fulfilledPost) {
             return $.when($.post('https://aai-api.com/api/serviceOrders?apiKey=' + window.allianzAPIKey, fulfilledPost))
         }).then(function (data) {
-
-            self.setState({'appointmentConfirmation', data})
+            self.setState({'appointmentConfirmation': data})
         })
     },
     getAssistanceType(type) {
