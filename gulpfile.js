@@ -40,7 +40,6 @@ gulp.task('browser-sync', function() {
 
 // JSX
 gulp.task('jsx', function() {
-  console.log("jsxing!!!!")
 
   return gulp.src('src/**/*.js')
       .pipe(plugins.plumber({
@@ -118,13 +117,21 @@ gulp.task('build', ['jsx', 'sass']);
 
 
 
-gulp.task('deployAndroid', ['cordova'], plugins.shell.task([
+gulp.task('cleanCordova', function(){
+  return rimraf('./cordova/www/**', function(err) {
+    plugins.util.log(err);
+  });
+});
+
+
+
+gulp.task('deployAndroid', ['cordova', 'cleanCordova'], plugins.shell.task([
   'cd cordova; cordova run android'
 ]));
 
 
 gulp.task('deployIOS', ['cordova'], plugins.shell.task([
-  'cd cordova; cordova run android'
+  'cd cordova; cordova run ios'
 ]));
 
 
@@ -133,12 +140,17 @@ gulp.task('cordova', ['bundle', 'sass'], function(){
   gulp.src('./index.html')
       .pipe(gulp.dest('cordova/www'))
 
+<<<<<<< HEAD
   gulp.src('src/img/**')
       .pipe(gulp.dest('cordova/www/build/img'))
 
 
   gulp.src('build/css/**')
       .pipe(gulp.dest('cordova/www/build/css'))
+=======
+  gulp.src('build/css/**')
+      .pipe(gulp.dest('cordova/www/build/css/'))
+>>>>>>> ca33cde614794a47ad955193c58f4b0ba590572c
 
 
   //gulp.src('node_modules/**')
