@@ -17,6 +17,7 @@
   "strict": true,
   "latedef": false,
   "expr": false,
+  "strict": false,
   "globals": {
     "describe": false,
     "it": false,
