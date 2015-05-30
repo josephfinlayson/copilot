@@ -30,13 +30,13 @@ var App = React.createClass({
     render() {
       return (
         <div>
-          <div className="bar-positive bar bar-header disable-user-behavior">
-            <button className="button button-icon icon ion-navicon-round"
-                    onClick={_.partial(this.transitionTo, 'settings')}></button>
+          <div className="bar-dark bar bar-header disable-user-behavior">
+            <button className="button button-clear" onClick={this.goBack}>〈 Back</button>
 
             <h1 className="title">CoPilot</h1>
 
-            <button className="button button-clear button-light" onClick={this.goBack}>Back</button>
+            <button className="button button-clear"
+                    onClick={_.partial(this.transitionTo, 'settings')}>SOS</button>
           </div>
           <div className="scroll-content ionic-scroll">
             <div className="scroll">
