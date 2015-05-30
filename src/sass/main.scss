@@ -2,12 +2,49 @@
 @import "../../bower_components/ionic/scss/ionic";
 @import "home";
 
+#sos {
+  @import "../../bower_components/bootstrap/dist/css/bootstrap.css";
+  @import "../../bower_components/jquery-mobile/css/themes/default/jquery.mobile.css";
+}
+.wrapper
+{
+    padding: 61px;
+}
+
+$map-width: 700px;
+$map-height: 500px;
+
+.map-wrapper {
+	position: relative;
+	// width: $map-width;
+	// height: $map-height;
+	margin: 20px;
+	text-align: center;
+	margin-top: 20px;
+	padding: 0;
+}
+
+.map-overlay {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: #444;
+	opacity: 0.8;
+	z-index: 10;
+	display: none;
+	color: #FFF;
+}
+
 #googleMap {
-  width: 700px;
-  height: 500px;
-  max-width: 100%;
-  background-color: #EDEDED;
-  margin: 20px auto;
+
+	// width: $map-width;
+	// height: $map-height;
+	// max-width: 100%;
+	// background-color: #EDEDED;
+	margin: 20px auto;
+	text-align: center;
 }
 
 .bar-positive {
@@ -37,7 +74,7 @@
 
 .loading-txt {
 	margin: 20px auto;
-	padding: 200px;
+	padding: 200px 20px;
 	font-size: 1.3em;
 }
 

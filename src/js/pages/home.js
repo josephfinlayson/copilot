@@ -66,7 +66,7 @@ var Minis = React.createClass({
         const shouldBeActivated = isActivated(mini.name);
         const handle = event => this.touch(event, mini);
         const divStyle = {
-          backgroundImage: `url(build/img/icon-${i+1}.svg)`
+          backgroundImage: `url(build/img/${mini.logo}.svg)`
         };
 
         return (
@@ -97,11 +97,12 @@ var App = React.createClass({
       {
         name: 'CrimeMapper',
         description: 'Travel safely through an unknown environment',
-        logo: '',
+        logo: 'icon-1',
         route: 'crimeMapper'
       },{
-        name: 'SOS',
-        logo: '',
+        name: 'Guardian',
+        description: "Call a guardian if you're feeling unsafe",
+        logo: 'icon-2',
         route: 'SOS'
       },{
         name: 'example app 3',
