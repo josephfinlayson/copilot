@@ -105,6 +105,34 @@ gulp.task('delete-build', function() {
 //build (no server)
 gulp.task('build', ['jsx', 'sass']);
 
+
+
+gulp.task('deployAndroid', ['cordova'], plugins.shell.task([
+  'cd cordova; cordova run android'
+]));
+
+
+gulp.task('deployIOS', ['cordova'], plugins.shell.task([
+  'cd cordova; cordova run android'
+]));
+
+
+gulp.task('cordova', ['bundle'], function(){
+  gulp.src('./index.html')
+      .pipe(gulp.dest('cordova/www'))
+
+  gulp.src('jspm_packages/**')
+      .pipe(gulp.dest('cordova/www/jspm_packages'))
+
+
+  //gulp.src('node_modules/**')
+  //    .pipe(gulp.dest('cordova/www/node_modules'))
+
+  return gulp.src('dist/js/**')
+      .pipe(gulp.dest('cordova/www/js'))
+
+});
+
 // Default
 gulp.task('default', ['serve']);
 
@@ -139,7 +167,7 @@ gulp.task('html', function() {
 
 // Bundle with jspm
 gulp.task('bundle', ['jsx'], plugins.shell.task([
-  'jspm bundle-sfx build/js/main dist/js/app.js'
+  'jspm bundle-sfx build/js/main dist/js/app.js --production'
 ]));
 
 // Uglify the bundle
