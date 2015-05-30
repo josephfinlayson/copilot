@@ -151,7 +151,7 @@ export default React.createClass({
                 <Modal isOpen={this.state.modalIsOpen}
                     onRequestClose={this.closeModal}
                 >
-                    <div className="padding scroll-content ionic-scroll has-header">
+                    <div className="padding scroll-content ionic-scroll">
                     {modalContents}
                     </div>
                 </Modal >

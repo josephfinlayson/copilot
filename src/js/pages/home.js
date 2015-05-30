@@ -60,7 +60,6 @@ var Minis = React.createClass({
   },
   render() {
     const minis = this.props.minis;
-    // <img src={`build/img/icon-${i+1}.png`}/>
     return (<div>
       {minis.map((mini, i) => {
         const shouldBeActivated = isActivated(mini.name);
@@ -108,7 +107,7 @@ var App = React.createClass({
         name: 'Health Emergency',
         description: 'Get assistance fast',
         logo: 'health_emergency',
-        route: ''
+        route: 'health'
       },{
         name: 'example app 4',
         logo: '',
