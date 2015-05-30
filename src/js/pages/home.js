@@ -105,8 +105,9 @@ var App = React.createClass({
         logo: 'icon-2',
         route: 'SOS'
       },{
-        name: 'example app 3',
-        logo: '',
+        name: 'Health Emergency',
+        description: 'Get assistance fast',
+        logo: 'health_emergency',
         route: ''
       },{
         name: 'example app 4',
