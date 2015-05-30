@@ -8145,6 +8145,1250 @@ System.register("npm:lodash@3.9.3/index", ["github:jspm/nodelibs-process@0.1.1"]
   return module.exports;
 });
 
+System.register("npm:object-assign@2.0.0/index", [], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  function ToObject(val) {
+    if (val == null) {
+      throw new TypeError('Object.assign cannot be called with null or undefined');
+    }
+    return Object(val);
+  }
+  module.exports = Object.assign || function(target, source) {
+    var from;
+    var keys;
+    var to = ToObject(target);
+    for (var s = 1; s < arguments.length; s++) {
+      from = arguments[s];
+      keys = Object.keys(Object(from));
+      for (var i = 0; i < keys.length; i++) {
+        to[keys[i]] = from[keys[i]];
+      }
+    }
+    return to;
+  };
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:qs@2.4.1/lib/utils", [], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var internals = {};
+  exports.arrayToObject = function(source) {
+    var obj = {};
+    for (var i = 0,
+        il = source.length; i < il; ++i) {
+      if (typeof source[i] !== 'undefined') {
+        obj[i] = source[i];
+      }
+    }
+    return obj;
+  };
+  exports.merge = function(target, source) {
+    if (!source) {
+      return target;
+    }
+    if (typeof source !== 'object') {
+      if (Array.isArray(target)) {
+        target.push(source);
+      } else {
+        target[source] = true;
+      }
+      return target;
+    }
+    if (typeof target !== 'object') {
+      target = [target].concat(source);
+      return target;
+    }
+    if (Array.isArray(target) && !Array.isArray(source)) {
+      target = exports.arrayToObject(target);
+    }
+    var keys = Object.keys(source);
+    for (var k = 0,
+        kl = keys.length; k < kl; ++k) {
+      var key = keys[k];
+      var value = source[key];
+      if (!target[key]) {
+        target[key] = value;
+      } else {
+        target[key] = exports.merge(target[key], value);
+      }
+    }
+    return target;
+  };
+  exports.decode = function(str) {
+    try {
+      return decodeURIComponent(str.replace(/\+/g, ' '));
+    } catch (e) {
+      return str;
+    }
+  };
+  exports.compact = function(obj, refs) {
+    if (typeof obj !== 'object' || obj === null) {
+      return obj;
+    }
+    refs = refs || [];
+    var lookup = refs.indexOf(obj);
+    if (lookup !== -1) {
+      return refs[lookup];
+    }
+    refs.push(obj);
+    if (Array.isArray(obj)) {
+      var compacted = [];
+      for (var i = 0,
+          il = obj.length; i < il; ++i) {
+        if (typeof obj[i] !== 'undefined') {
+          compacted.push(obj[i]);
+        }
+      }
+      return compacted;
+    }
+    var keys = Object.keys(obj);
+    for (i = 0, il = keys.length; i < il; ++i) {
+      var key = keys[i];
+      obj[key] = exports.compact(obj[key], refs);
+    }
+    return obj;
+  };
+  exports.isRegExp = function(obj) {
+    return Object.prototype.toString.call(obj) === '[object RegExp]';
+  };
+  exports.isBuffer = function(obj) {
+    if (obj === null || typeof obj === 'undefined') {
+      return false;
+    }
+    return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
+  };
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:qs@2.4.1/lib/parse", ["npm:qs@2.4.1/lib/utils"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var Utils = require("npm:qs@2.4.1/lib/utils");
+  var internals = {
+    delimiter: '&',
+    depth: 5,
+    arrayLimit: 20,
+    parameterLimit: 1000
+  };
+  internals.parseValues = function(str, options) {
+    var obj = {};
+    var parts = str.split(options.delimiter, options.parameterLimit === Infinity ? undefined : options.parameterLimit);
+    for (var i = 0,
+        il = parts.length; i < il; ++i) {
+      var part = parts[i];
+      var pos = part.indexOf(']=') === -1 ? part.indexOf('=') : part.indexOf(']=') + 1;
+      if (pos === -1) {
+        obj[Utils.decode(part)] = '';
+      } else {
+        var key = Utils.decode(part.slice(0, pos));
+        var val = Utils.decode(part.slice(pos + 1));
+        if (Object.prototype.hasOwnProperty(key)) {
+          continue;
+        }
+        if (!obj.hasOwnProperty(key)) {
+          obj[key] = val;
+        } else {
+          obj[key] = [].concat(obj[key]).concat(val);
+        }
+      }
+    }
+    return obj;
+  };
+  internals.parseObject = function(chain, val, options) {
+    if (!chain.length) {
+      return val;
+    }
+    var root = chain.shift();
+    var obj = {};
+    if (root === '[]') {
+      obj = [];
+      obj = obj.concat(internals.parseObject(chain, val, options));
+    } else {
+      var cleanRoot = root[0] === '[' && root[root.length - 1] === ']' ? root.slice(1, root.length - 1) : root;
+      var index = parseInt(cleanRoot, 10);
+      var indexString = '' + index;
+      if (!isNaN(index) && root !== cleanRoot && indexString === cleanRoot && index >= 0 && index <= options.arrayLimit) {
+        obj = [];
+        obj[index] = internals.parseObject(chain, val, options);
+      } else {
+        obj[cleanRoot] = internals.parseObject(chain, val, options);
+      }
+    }
+    return obj;
+  };
+  internals.parseKeys = function(key, val, options) {
+    if (!key) {
+      return ;
+    }
+    var parent = /^([^\[\]]*)/;
+    var child = /(\[[^\[\]]*\])/g;
+    var segment = parent.exec(key);
+    if (Object.prototype.hasOwnProperty(segment[1])) {
+      return ;
+    }
+    var keys = [];
+    if (segment[1]) {
+      keys.push(segment[1]);
+    }
+    var i = 0;
+    while ((segment = child.exec(key)) !== null && i < options.depth) {
+      ++i;
+      if (!Object.prototype.hasOwnProperty(segment[1].replace(/\[|\]/g, ''))) {
+        keys.push(segment[1]);
+      }
+    }
+    if (segment) {
+      keys.push('[' + key.slice(segment.index) + ']');
+    }
+    return internals.parseObject(keys, val, options);
+  };
+  module.exports = function(str, options) {
+    if (str === '' || str === null || typeof str === 'undefined') {
+      return {};
+    }
+    options = options || {};
+    options.delimiter = typeof options.delimiter === 'string' || Utils.isRegExp(options.delimiter) ? options.delimiter : internals.delimiter;
+    options.depth = typeof options.depth === 'number' ? options.depth : internals.depth;
+    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : internals.arrayLimit;
+    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : internals.parameterLimit;
+    var tempObj = typeof str === 'string' ? internals.parseValues(str, options) : str;
+    var obj = {};
+    var keys = Object.keys(tempObj);
+    for (var i = 0,
+        il = keys.length; i < il; ++i) {
+      var key = keys[i];
+      var newObj = internals.parseKeys(key, tempObj[key], options);
+      obj = Utils.merge(obj, newObj);
+    }
+    return Utils.compact(obj);
+  };
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/components/ContextWrapper", ["npm:react@0.13.3"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var _classCallCheck = function(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError('Cannot call a class as a function');
+    }
+  };
+  var _createClass = (function() {
+    function defineProperties(target, props) {
+      for (var i = 0; i < props.length; i++) {
+        var descriptor = props[i];
+        descriptor.enumerable = descriptor.enumerable || false;
+        descriptor.configurable = true;
+        if ('value' in descriptor)
+          descriptor.writable = true;
+        Object.defineProperty(target, descriptor.key, descriptor);
+      }
+    }
+    return function(Constructor, protoProps, staticProps) {
+      if (protoProps)
+        defineProperties(Constructor.prototype, protoProps);
+      if (staticProps)
+        defineProperties(Constructor, staticProps);
+      return Constructor;
+    };
+  })();
+  var _inherits = function(subClass, superClass) {
+    if (typeof superClass !== 'function' && superClass !== null) {
+      throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {
+        value: subClass,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }});
+    if (superClass)
+      subClass.__proto__ = superClass;
+  };
+  var React = require("npm:react@0.13.3");
+  var ContextWrapper = (function(_React$Component) {
+    function ContextWrapper() {
+      _classCallCheck(this, ContextWrapper);
+      if (_React$Component != null) {
+        _React$Component.apply(this, arguments);
+      }
+    }
+    _inherits(ContextWrapper, _React$Component);
+    _createClass(ContextWrapper, [{
+      key: 'render',
+      value: function render() {
+        return this.props.children;
+      }
+    }]);
+    return ContextWrapper;
+  })(React.Component);
+  module.exports = ContextWrapper;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/components/Route", ["npm:react@0.13.3", "npm:react@0.13.3/lib/invariant", "npm:react-router@0.13.3/lib/PropTypes", "npm:react-router@0.13.3/lib/components/RouteHandler"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var _classCallCheck = function(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError('Cannot call a class as a function');
+    }
+  };
+  var _createClass = (function() {
+    function defineProperties(target, props) {
+      for (var i = 0; i < props.length; i++) {
+        var descriptor = props[i];
+        descriptor.enumerable = descriptor.enumerable || false;
+        descriptor.configurable = true;
+        if ('value' in descriptor)
+          descriptor.writable = true;
+        Object.defineProperty(target, descriptor.key, descriptor);
+      }
+    }
+    return function(Constructor, protoProps, staticProps) {
+      if (protoProps)
+        defineProperties(Constructor.prototype, protoProps);
+      if (staticProps)
+        defineProperties(Constructor, staticProps);
+      return Constructor;
+    };
+  })();
+  var _inherits = function(subClass, superClass) {
+    if (typeof superClass !== 'function' && superClass !== null) {
+      throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {
+        value: subClass,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }});
+    if (superClass)
+      subClass.__proto__ = superClass;
+  };
+  var React = require("npm:react@0.13.3");
+  var invariant = require("npm:react@0.13.3/lib/invariant");
+  var PropTypes = require("npm:react-router@0.13.3/lib/PropTypes");
+  var RouteHandler = require("npm:react-router@0.13.3/lib/components/RouteHandler");
+  var Route = (function(_React$Component) {
+    function Route() {
+      _classCallCheck(this, Route);
+      if (_React$Component != null) {
+        _React$Component.apply(this, arguments);
+      }
+    }
+    _inherits(Route, _React$Component);
+    _createClass(Route, [{
+      key: 'render',
+      value: function render() {
+        invariant(false, '%s elements are for router configuration only and should not be rendered', this.constructor.name);
+      }
+    }]);
+    return Route;
+  })(React.Component);
+  Route.propTypes = {
+    name: PropTypes.string,
+    path: PropTypes.string,
+    handler: PropTypes.func,
+    ignoreScrollBehavior: PropTypes.bool
+  };
+  Route.defaultProps = {handler: RouteHandler};
+  module.exports = Route;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/components/Link", ["npm:react@0.13.3", "npm:react@0.13.3/lib/Object.assign", "npm:react-router@0.13.3/lib/PropTypes"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var _classCallCheck = function(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError('Cannot call a class as a function');
+    }
+  };
+  var _createClass = (function() {
+    function defineProperties(target, props) {
+      for (var i = 0; i < props.length; i++) {
+        var descriptor = props[i];
+        descriptor.enumerable = descriptor.enumerable || false;
+        descriptor.configurable = true;
+        if ('value' in descriptor)
+          descriptor.writable = true;
+        Object.defineProperty(target, descriptor.key, descriptor);
+      }
+    }
+    return function(Constructor, protoProps, staticProps) {
+      if (protoProps)
+        defineProperties(Constructor.prototype, protoProps);
+      if (staticProps)
+        defineProperties(Constructor, staticProps);
+      return Constructor;
+    };
+  })();
+  var _inherits = function(subClass, superClass) {
+    if (typeof superClass !== 'function' && superClass !== null) {
+      throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {
+        value: subClass,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }});
+    if (superClass)
+      subClass.__proto__ = superClass;
+  };
+  var React = require("npm:react@0.13.3");
+  var assign = require("npm:react@0.13.3/lib/Object.assign");
+  var PropTypes = require("npm:react-router@0.13.3/lib/PropTypes");
+  function isLeftClickEvent(event) {
+    return event.button === 0;
+  }
+  function isModifiedEvent(event) {
+    return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
+  }
+  var Link = (function(_React$Component) {
+    function Link() {
+      _classCallCheck(this, Link);
+      if (_React$Component != null) {
+        _React$Component.apply(this, arguments);
+      }
+    }
+    _inherits(Link, _React$Component);
+    _createClass(Link, [{
+      key: 'handleClick',
+      value: function handleClick(event) {
+        var allowTransition = true;
+        var clickResult;
+        if (this.props.onClick)
+          clickResult = this.props.onClick(event);
+        if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
+          return ;
+        }
+        if (clickResult === false || event.defaultPrevented === true)
+          allowTransition = false;
+        event.preventDefault();
+        if (allowTransition)
+          this.context.router.transitionTo(this.props.to, this.props.params, this.props.query);
+      }
+    }, {
+      key: 'getHref',
+      value: function getHref() {
+        return this.context.router.makeHref(this.props.to, this.props.params, this.props.query);
+      }
+    }, {
+      key: 'getClassName',
+      value: function getClassName() {
+        var className = this.props.className;
+        if (this.getActiveState())
+          className += ' ' + this.props.activeClassName;
+        return className;
+      }
+    }, {
+      key: 'getActiveState',
+      value: function getActiveState() {
+        return this.context.router.isActive(this.props.to, this.props.params, this.props.query);
+      }
+    }, {
+      key: 'render',
+      value: function render() {
+        var props = assign({}, this.props, {
+          href: this.getHref(),
+          className: this.getClassName(),
+          onClick: this.handleClick.bind(this)
+        });
+        if (props.activeStyle && this.getActiveState())
+          props.style = props.activeStyle;
+        return React.DOM.a(props, this.props.children);
+      }
+    }]);
+    return Link;
+  })(React.Component);
+  Link.contextTypes = {router: PropTypes.router.isRequired};
+  Link.propTypes = {
+    activeClassName: PropTypes.string.isRequired,
+    to: PropTypes.oneOfType([PropTypes.string, PropTypes.route]).isRequired,
+    params: PropTypes.object,
+    query: PropTypes.object,
+    activeStyle: PropTypes.object,
+    onClick: PropTypes.func
+  };
+  Link.defaultProps = {
+    activeClassName: 'active',
+    className: ''
+  };
+  module.exports = Link;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/components/NotFoundRoute", ["npm:react-router@0.13.3/lib/PropTypes", "npm:react-router@0.13.3/lib/components/RouteHandler", "npm:react-router@0.13.3/lib/components/Route"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var _classCallCheck = function(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError('Cannot call a class as a function');
+    }
+  };
+  var _inherits = function(subClass, superClass) {
+    if (typeof superClass !== 'function' && superClass !== null) {
+      throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {
+        value: subClass,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }});
+    if (superClass)
+      subClass.__proto__ = superClass;
+  };
+  var PropTypes = require("npm:react-router@0.13.3/lib/PropTypes");
+  var RouteHandler = require("npm:react-router@0.13.3/lib/components/RouteHandler");
+  var Route = require("npm:react-router@0.13.3/lib/components/Route");
+  var NotFoundRoute = (function(_Route) {
+    function NotFoundRoute() {
+      _classCallCheck(this, NotFoundRoute);
+      if (_Route != null) {
+        _Route.apply(this, arguments);
+      }
+    }
+    _inherits(NotFoundRoute, _Route);
+    return NotFoundRoute;
+  })(Route);
+  NotFoundRoute.propTypes = {
+    name: PropTypes.string,
+    path: PropTypes.falsy,
+    children: PropTypes.falsy,
+    handler: PropTypes.func.isRequired
+  };
+  NotFoundRoute.defaultProps = {handler: RouteHandler};
+  module.exports = NotFoundRoute;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/components/Redirect", ["npm:react-router@0.13.3/lib/PropTypes", "npm:react-router@0.13.3/lib/components/Route"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var _classCallCheck = function(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError('Cannot call a class as a function');
+    }
+  };
+  var _inherits = function(subClass, superClass) {
+    if (typeof superClass !== 'function' && superClass !== null) {
+      throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {
+        value: subClass,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }});
+    if (superClass)
+      subClass.__proto__ = superClass;
+  };
+  var PropTypes = require("npm:react-router@0.13.3/lib/PropTypes");
+  var Route = require("npm:react-router@0.13.3/lib/components/Route");
+  var Redirect = (function(_Route) {
+    function Redirect() {
+      _classCallCheck(this, Redirect);
+      if (_Route != null) {
+        _Route.apply(this, arguments);
+      }
+    }
+    _inherits(Redirect, _Route);
+    return Redirect;
+  })(Route);
+  Redirect.propTypes = {
+    path: PropTypes.string,
+    from: PropTypes.string,
+    to: PropTypes.string,
+    handler: PropTypes.falsy
+  };
+  Redirect.defaultProps = {};
+  module.exports = Redirect;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/actions/LocationActions", [], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var LocationActions = {
+    PUSH: 'push',
+    REPLACE: 'replace',
+    POP: 'pop'
+  };
+  module.exports = LocationActions;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/History", ["npm:react@0.13.3/lib/invariant", "npm:react@0.13.3/lib/ExecutionEnvironment"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var invariant = require("npm:react@0.13.3/lib/invariant");
+  var canUseDOM = require("npm:react@0.13.3/lib/ExecutionEnvironment").canUseDOM;
+  var History = {
+    length: 1,
+    back: function back() {
+      invariant(canUseDOM, 'Cannot use History.back without a DOM');
+      History.length -= 1;
+      window.history.back();
+    }
+  };
+  module.exports = History;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/locations/HistoryLocation", ["npm:react-router@0.13.3/lib/actions/LocationActions", "npm:react-router@0.13.3/lib/History"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var LocationActions = require("npm:react-router@0.13.3/lib/actions/LocationActions");
+  var History = require("npm:react-router@0.13.3/lib/History");
+  var _listeners = [];
+  var _isListening = false;
+  function notifyChange(type) {
+    var change = {
+      path: HistoryLocation.getCurrentPath(),
+      type: type
+    };
+    _listeners.forEach(function(listener) {
+      listener.call(HistoryLocation, change);
+    });
+  }
+  function onPopState(event) {
+    if (event.state === undefined) {
+      return ;
+    }
+    notifyChange(LocationActions.POP);
+  }
+  var HistoryLocation = {
+    addChangeListener: function addChangeListener(listener) {
+      _listeners.push(listener);
+      if (!_isListening) {
+        if (window.addEventListener) {
+          window.addEventListener('popstate', onPopState, false);
+        } else {
+          window.attachEvent('onpopstate', onPopState);
+        }
+        _isListening = true;
+      }
+    },
+    removeChangeListener: function removeChangeListener(listener) {
+      _listeners = _listeners.filter(function(l) {
+        return l !== listener;
+      });
+      if (_listeners.length === 0) {
+        if (window.addEventListener) {
+          window.removeEventListener('popstate', onPopState, false);
+        } else {
+          window.removeEvent('onpopstate', onPopState);
+        }
+        _isListening = false;
+      }
+    },
+    push: function push(path) {
+      window.history.pushState({path: path}, '', path);
+      History.length += 1;
+      notifyChange(LocationActions.PUSH);
+    },
+    replace: function replace(path) {
+      window.history.replaceState({path: path}, '', path);
+      notifyChange(LocationActions.REPLACE);
+    },
+    pop: History.back,
+    getCurrentPath: function getCurrentPath() {
+      return decodeURI(window.location.pathname + window.location.search);
+    },
+    toString: function toString() {
+      return '<HistoryLocation>';
+    }
+  };
+  module.exports = HistoryLocation;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/locations/RefreshLocation", ["npm:react-router@0.13.3/lib/locations/HistoryLocation", "npm:react-router@0.13.3/lib/History"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var HistoryLocation = require("npm:react-router@0.13.3/lib/locations/HistoryLocation");
+  var History = require("npm:react-router@0.13.3/lib/History");
+  var RefreshLocation = {
+    push: function push(path) {
+      window.location = path;
+    },
+    replace: function replace(path) {
+      window.location.replace(path);
+    },
+    pop: History.back,
+    getCurrentPath: HistoryLocation.getCurrentPath,
+    toString: function toString() {
+      return '<RefreshLocation>';
+    }
+  };
+  module.exports = RefreshLocation;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/locations/StaticLocation", ["npm:react@0.13.3/lib/invariant"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var _classCallCheck = function(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError('Cannot call a class as a function');
+    }
+  };
+  var _createClass = (function() {
+    function defineProperties(target, props) {
+      for (var i = 0; i < props.length; i++) {
+        var descriptor = props[i];
+        descriptor.enumerable = descriptor.enumerable || false;
+        descriptor.configurable = true;
+        if ('value' in descriptor)
+          descriptor.writable = true;
+        Object.defineProperty(target, descriptor.key, descriptor);
+      }
+    }
+    return function(Constructor, protoProps, staticProps) {
+      if (protoProps)
+        defineProperties(Constructor.prototype, protoProps);
+      if (staticProps)
+        defineProperties(Constructor, staticProps);
+      return Constructor;
+    };
+  })();
+  var invariant = require("npm:react@0.13.3/lib/invariant");
+  function throwCannotModify() {
+    invariant(false, 'You cannot modify a static location');
+  }
+  var StaticLocation = (function() {
+    function StaticLocation(path) {
+      _classCallCheck(this, StaticLocation);
+      this.path = path;
+    }
+    _createClass(StaticLocation, [{
+      key: 'getCurrentPath',
+      value: function getCurrentPath() {
+        return this.path;
+      }
+    }, {
+      key: 'toString',
+      value: function toString() {
+        return '<StaticLocation path="' + this.path + '">';
+      }
+    }]);
+    return StaticLocation;
+  })();
+  StaticLocation.prototype.push = throwCannotModify;
+  StaticLocation.prototype.replace = throwCannotModify;
+  StaticLocation.prototype.pop = throwCannotModify;
+  module.exports = StaticLocation;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/locations/TestLocation", ["npm:react@0.13.3/lib/invariant", "npm:react-router@0.13.3/lib/actions/LocationActions", "npm:react-router@0.13.3/lib/History"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var _classCallCheck = function(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError('Cannot call a class as a function');
+    }
+  };
+  var _createClass = (function() {
+    function defineProperties(target, props) {
+      for (var i = 0; i < props.length; i++) {
+        var descriptor = props[i];
+        descriptor.enumerable = descriptor.enumerable || false;
+        descriptor.configurable = true;
+        if ('value' in descriptor)
+          descriptor.writable = true;
+        Object.defineProperty(target, descriptor.key, descriptor);
+      }
+    }
+    return function(Constructor, protoProps, staticProps) {
+      if (protoProps)
+        defineProperties(Constructor.prototype, protoProps);
+      if (staticProps)
+        defineProperties(Constructor, staticProps);
+      return Constructor;
+    };
+  })();
+  var invariant = require("npm:react@0.13.3/lib/invariant");
+  var LocationActions = require("npm:react-router@0.13.3/lib/actions/LocationActions");
+  var History = require("npm:react-router@0.13.3/lib/History");
+  var TestLocation = (function() {
+    function TestLocation(history) {
+      _classCallCheck(this, TestLocation);
+      this.history = history || [];
+      this.listeners = [];
+      this._updateHistoryLength();
+    }
+    _createClass(TestLocation, [{
+      key: 'needsDOM',
+      get: function() {
+        return false;
+      }
+    }, {
+      key: '_updateHistoryLength',
+      value: function _updateHistoryLength() {
+        History.length = this.history.length;
+      }
+    }, {
+      key: '_notifyChange',
+      value: function _notifyChange(type) {
+        var change = {
+          path: this.getCurrentPath(),
+          type: type
+        };
+        for (var i = 0,
+            len = this.listeners.length; i < len; ++i)
+          this.listeners[i].call(this, change);
+      }
+    }, {
+      key: 'addChangeListener',
+      value: function addChangeListener(listener) {
+        this.listeners.push(listener);
+      }
+    }, {
+      key: 'removeChangeListener',
+      value: function removeChangeListener(listener) {
+        this.listeners = this.listeners.filter(function(l) {
+          return l !== listener;
+        });
+      }
+    }, {
+      key: 'push',
+      value: function push(path) {
+        this.history.push(path);
+        this._updateHistoryLength();
+        this._notifyChange(LocationActions.PUSH);
+      }
+    }, {
+      key: 'replace',
+      value: function replace(path) {
+        invariant(this.history.length, 'You cannot replace the current path with no history');
+        this.history[this.history.length - 1] = path;
+        this._notifyChange(LocationActions.REPLACE);
+      }
+    }, {
+      key: 'pop',
+      value: function pop() {
+        this.history.pop();
+        this._updateHistoryLength();
+        this._notifyChange(LocationActions.POP);
+      }
+    }, {
+      key: 'getCurrentPath',
+      value: function getCurrentPath() {
+        return this.history[this.history.length - 1];
+      }
+    }, {
+      key: 'toString',
+      value: function toString() {
+        return '<TestLocation>';
+      }
+    }]);
+    return TestLocation;
+  })();
+  module.exports = TestLocation;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/behaviors/ImitateBrowserBehavior", ["npm:react-router@0.13.3/lib/actions/LocationActions"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var LocationActions = require("npm:react-router@0.13.3/lib/actions/LocationActions");
+  var ImitateBrowserBehavior = {updateScrollPosition: function updateScrollPosition(position, actionType) {
+      switch (actionType) {
+        case LocationActions.PUSH:
+        case LocationActions.REPLACE:
+          window.scrollTo(0, 0);
+          break;
+        case LocationActions.POP:
+          if (position) {
+            window.scrollTo(position.x, position.y);
+          } else {
+            window.scrollTo(0, 0);
+          }
+          break;
+      }
+    }};
+  module.exports = ImitateBrowserBehavior;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/behaviors/ScrollToTopBehavior", [], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  "use strict";
+  var ScrollToTopBehavior = {updateScrollPosition: function updateScrollPosition() {
+      window.scrollTo(0, 0);
+    }};
+  module.exports = ScrollToTopBehavior;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/Navigation", ["npm:react-router@0.13.3/lib/PropTypes"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var PropTypes = require("npm:react-router@0.13.3/lib/PropTypes");
+  var Navigation = {
+    contextTypes: {router: PropTypes.router.isRequired},
+    makePath: function makePath(to, params, query) {
+      return this.context.router.makePath(to, params, query);
+    },
+    makeHref: function makeHref(to, params, query) {
+      return this.context.router.makeHref(to, params, query);
+    },
+    transitionTo: function transitionTo(to, params, query) {
+      this.context.router.transitionTo(to, params, query);
+    },
+    replaceWith: function replaceWith(to, params, query) {
+      this.context.router.replaceWith(to, params, query);
+    },
+    goBack: function goBack() {
+      return this.context.router.goBack();
+    }
+  };
+  module.exports = Navigation;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/State", ["npm:react-router@0.13.3/lib/PropTypes"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var PropTypes = require("npm:react-router@0.13.3/lib/PropTypes");
+  var State = {
+    contextTypes: {router: PropTypes.router.isRequired},
+    getPath: function getPath() {
+      return this.context.router.getCurrentPath();
+    },
+    getPathname: function getPathname() {
+      return this.context.router.getCurrentPathname();
+    },
+    getParams: function getParams() {
+      return this.context.router.getCurrentParams();
+    },
+    getQuery: function getQuery() {
+      return this.context.router.getCurrentQuery();
+    },
+    getRoutes: function getRoutes() {
+      return this.context.router.getCurrentRoutes();
+    },
+    isActive: function isActive(to, params, query) {
+      return this.context.router.isActive(to, params, query);
+    }
+  };
+  module.exports = State;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/createRoutesFromReactChildren", ["npm:react@0.13.3", "npm:react@0.13.3/lib/Object.assign", "npm:react@0.13.3/lib/warning", "npm:react-router@0.13.3/lib/components/DefaultRoute", "npm:react-router@0.13.3/lib/components/NotFoundRoute", "npm:react-router@0.13.3/lib/components/Redirect", "npm:react-router@0.13.3/lib/Route"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var React = require("npm:react@0.13.3");
+  var assign = require("npm:react@0.13.3/lib/Object.assign");
+  var warning = require("npm:react@0.13.3/lib/warning");
+  var DefaultRoute = require("npm:react-router@0.13.3/lib/components/DefaultRoute");
+  var NotFoundRoute = require("npm:react-router@0.13.3/lib/components/NotFoundRoute");
+  var Redirect = require("npm:react-router@0.13.3/lib/components/Redirect");
+  var Route = require("npm:react-router@0.13.3/lib/Route");
+  function checkPropTypes(componentName, propTypes, props) {
+    componentName = componentName || 'UnknownComponent';
+    for (var propName in propTypes) {
+      if (propTypes.hasOwnProperty(propName)) {
+        var error = propTypes[propName](props, propName, componentName);
+        if (error instanceof Error)
+          warning(false, error.message);
+      }
+    }
+  }
+  function createRouteOptions(props) {
+    var options = assign({}, props);
+    var handler = options.handler;
+    if (handler) {
+      options.onEnter = handler.willTransitionTo;
+      options.onLeave = handler.willTransitionFrom;
+    }
+    return options;
+  }
+  function createRouteFromReactElement(element) {
+    if (!React.isValidElement(element)) {
+      return ;
+    }
+    var type = element.type;
+    var props = assign({}, type.defaultProps, element.props);
+    if (type.propTypes)
+      checkPropTypes(type.displayName, type.propTypes, props);
+    if (type === DefaultRoute) {
+      return Route.createDefaultRoute(createRouteOptions(props));
+    }
+    if (type === NotFoundRoute) {
+      return Route.createNotFoundRoute(createRouteOptions(props));
+    }
+    if (type === Redirect) {
+      return Route.createRedirect(createRouteOptions(props));
+    }
+    return Route.createRoute(createRouteOptions(props), function() {
+      if (props.children)
+        createRoutesFromReactChildren(props.children);
+    });
+  }
+  function createRoutesFromReactChildren(children) {
+    var routes = [];
+    React.Children.forEach(children, function(child) {
+      if (child = createRouteFromReactElement(child))
+        routes.push(child);
+    });
+    return routes;
+  }
+  module.exports = createRoutesFromReactChildren;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/getWindowScrollPosition", ["npm:react@0.13.3/lib/invariant", "npm:react@0.13.3/lib/ExecutionEnvironment"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var invariant = require("npm:react@0.13.3/lib/invariant");
+  var canUseDOM = require("npm:react@0.13.3/lib/ExecutionEnvironment").canUseDOM;
+  function getWindowScrollPosition() {
+    invariant(canUseDOM, 'Cannot get current scroll position without a DOM');
+    return {
+      x: window.pageXOffset || document.documentElement.scrollLeft,
+      y: window.pageYOffset || document.documentElement.scrollTop
+    };
+  }
+  module.exports = getWindowScrollPosition;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/isReactChildren", ["npm:react@0.13.3"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var React = require("npm:react@0.13.3");
+  function isValidChild(object) {
+    return object == null || React.isValidElement(object);
+  }
+  function isReactChildren(object) {
+    return isValidChild(object) || Array.isArray(object) && object.every(isValidChild);
+  }
+  module.exports = isReactChildren;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/Cancellation", [], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  "use strict";
+  function Cancellation() {}
+  module.exports = Cancellation;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/Redirect", [], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  "use strict";
+  function Redirect(to, params, query) {
+    this.to = to;
+    this.params = params;
+    this.query = query;
+  }
+  module.exports = Redirect;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/Match", ["npm:react-router@0.13.3/lib/PathUtils"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var _classCallCheck = function(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError('Cannot call a class as a function');
+    }
+  };
+  var _createClass = (function() {
+    function defineProperties(target, props) {
+      for (var i = 0; i < props.length; i++) {
+        var descriptor = props[i];
+        descriptor.enumerable = descriptor.enumerable || false;
+        descriptor.configurable = true;
+        if ('value' in descriptor)
+          descriptor.writable = true;
+        Object.defineProperty(target, descriptor.key, descriptor);
+      }
+    }
+    return function(Constructor, protoProps, staticProps) {
+      if (protoProps)
+        defineProperties(Constructor.prototype, protoProps);
+      if (staticProps)
+        defineProperties(Constructor, staticProps);
+      return Constructor;
+    };
+  })();
+  var PathUtils = require("npm:react-router@0.13.3/lib/PathUtils");
+  function deepSearch(route, pathname, query) {
+    var childRoutes = route.childRoutes;
+    if (childRoutes) {
+      var match,
+          childRoute;
+      for (var i = 0,
+          len = childRoutes.length; i < len; ++i) {
+        childRoute = childRoutes[i];
+        if (childRoute.isDefault || childRoute.isNotFound)
+          continue;
+        if (match = deepSearch(childRoute, pathname, query)) {
+          match.routes.unshift(route);
+          return match;
+        }
+      }
+    }
+    var defaultRoute = route.defaultRoute;
+    if (defaultRoute && (params = PathUtils.extractParams(defaultRoute.path, pathname))) {
+      return new Match(pathname, params, query, [route, defaultRoute]);
+    }
+    var notFoundRoute = route.notFoundRoute;
+    if (notFoundRoute && (params = PathUtils.extractParams(notFoundRoute.path, pathname))) {
+      return new Match(pathname, params, query, [route, notFoundRoute]);
+    }
+    var params = PathUtils.extractParams(route.path, pathname);
+    if (params) {
+      return new Match(pathname, params, query, [route]);
+    }
+    return null;
+  }
+  var Match = (function() {
+    function Match(pathname, params, query, routes) {
+      _classCallCheck(this, Match);
+      this.pathname = pathname;
+      this.params = params;
+      this.query = query;
+      this.routes = routes;
+    }
+    _createClass(Match, null, [{
+      key: 'findMatch',
+      value: function findMatch(routes, path) {
+        var pathname = PathUtils.withoutQuery(path);
+        var query = PathUtils.extractQuery(path);
+        var match = null;
+        for (var i = 0,
+            len = routes.length; match == null && i < len; ++i)
+          match = deepSearch(routes[i], pathname, query);
+        return match;
+      }
+    }]);
+    return Match;
+  })();
+  module.exports = Match;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/supportsHistory", [], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  function supportsHistory() {
+    var ua = navigator.userAgent;
+    if ((ua.indexOf('Android 2.') !== -1 || ua.indexOf('Android 4.0') !== -1) && ua.indexOf('Mobile Safari') !== -1 && ua.indexOf('Chrome') === -1 && ua.indexOf('Windows Phone') === -1) {
+      return false;
+    }
+    return window.history && 'pushState' in window.history;
+  }
+  module.exports = supportsHistory;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-router@0.13.3/lib/runRouter", ["npm:react-router@0.13.3/lib/createRouter"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  'use strict';
+  var createRouter = require("npm:react-router@0.13.3/lib/createRouter");
+  function runRouter(routes, location, callback) {
+    if (typeof location === 'function') {
+      callback = location;
+      location = null;
+    }
+    var router = createRouter({
+      routes: routes,
+      location: location
+    });
+    router.run(callback);
+    return router;
+  }
+  module.exports = runRouter;
+  global.define = __define;
+  return module.exports;
+});
+
 (function() {
 function define(){};  define.amd = {};
 (function(global, factory) {
@@ -14069,1250 +15313,6 @@ function define(){};  define.amd = {};
   return jQuery;
 }));
 })();
-System.register("npm:object-assign@2.0.0/index", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  function ToObject(val) {
-    if (val == null) {
-      throw new TypeError('Object.assign cannot be called with null or undefined');
-    }
-    return Object(val);
-  }
-  module.exports = Object.assign || function(target, source) {
-    var from;
-    var keys;
-    var to = ToObject(target);
-    for (var s = 1; s < arguments.length; s++) {
-      from = arguments[s];
-      keys = Object.keys(Object(from));
-      for (var i = 0; i < keys.length; i++) {
-        to[keys[i]] = from[keys[i]];
-      }
-    }
-    return to;
-  };
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:qs@2.4.1/lib/utils", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  var internals = {};
-  exports.arrayToObject = function(source) {
-    var obj = {};
-    for (var i = 0,
-        il = source.length; i < il; ++i) {
-      if (typeof source[i] !== 'undefined') {
-        obj[i] = source[i];
-      }
-    }
-    return obj;
-  };
-  exports.merge = function(target, source) {
-    if (!source) {
-      return target;
-    }
-    if (typeof source !== 'object') {
-      if (Array.isArray(target)) {
-        target.push(source);
-      } else {
-        target[source] = true;
-      }
-      return target;
-    }
-    if (typeof target !== 'object') {
-      target = [target].concat(source);
-      return target;
-    }
-    if (Array.isArray(target) && !Array.isArray(source)) {
-      target = exports.arrayToObject(target);
-    }
-    var keys = Object.keys(source);
-    for (var k = 0,
-        kl = keys.length; k < kl; ++k) {
-      var key = keys[k];
-      var value = source[key];
-      if (!target[key]) {
-        target[key] = value;
-      } else {
-        target[key] = exports.merge(target[key], value);
-      }
-    }
-    return target;
-  };
-  exports.decode = function(str) {
-    try {
-      return decodeURIComponent(str.replace(/\+/g, ' '));
-    } catch (e) {
-      return str;
-    }
-  };
-  exports.compact = function(obj, refs) {
-    if (typeof obj !== 'object' || obj === null) {
-      return obj;
-    }
-    refs = refs || [];
-    var lookup = refs.indexOf(obj);
-    if (lookup !== -1) {
-      return refs[lookup];
-    }
-    refs.push(obj);
-    if (Array.isArray(obj)) {
-      var compacted = [];
-      for (var i = 0,
-          il = obj.length; i < il; ++i) {
-        if (typeof obj[i] !== 'undefined') {
-          compacted.push(obj[i]);
-        }
-      }
-      return compacted;
-    }
-    var keys = Object.keys(obj);
-    for (i = 0, il = keys.length; i < il; ++i) {
-      var key = keys[i];
-      obj[key] = exports.compact(obj[key], refs);
-    }
-    return obj;
-  };
-  exports.isRegExp = function(obj) {
-    return Object.prototype.toString.call(obj) === '[object RegExp]';
-  };
-  exports.isBuffer = function(obj) {
-    if (obj === null || typeof obj === 'undefined') {
-      return false;
-    }
-    return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
-  };
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:qs@2.4.1/lib/parse", ["npm:qs@2.4.1/lib/utils"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  var Utils = require("npm:qs@2.4.1/lib/utils");
-  var internals = {
-    delimiter: '&',
-    depth: 5,
-    arrayLimit: 20,
-    parameterLimit: 1000
-  };
-  internals.parseValues = function(str, options) {
-    var obj = {};
-    var parts = str.split(options.delimiter, options.parameterLimit === Infinity ? undefined : options.parameterLimit);
-    for (var i = 0,
-        il = parts.length; i < il; ++i) {
-      var part = parts[i];
-      var pos = part.indexOf(']=') === -1 ? part.indexOf('=') : part.indexOf(']=') + 1;
-      if (pos === -1) {
-        obj[Utils.decode(part)] = '';
-      } else {
-        var key = Utils.decode(part.slice(0, pos));
-        var val = Utils.decode(part.slice(pos + 1));
-        if (Object.prototype.hasOwnProperty(key)) {
-          continue;
-        }
-        if (!obj.hasOwnProperty(key)) {
-          obj[key] = val;
-        } else {
-          obj[key] = [].concat(obj[key]).concat(val);
-        }
-      }
-    }
-    return obj;
-  };
-  internals.parseObject = function(chain, val, options) {
-    if (!chain.length) {
-      return val;
-    }
-    var root = chain.shift();
-    var obj = {};
-    if (root === '[]') {
-      obj = [];
-      obj = obj.concat(internals.parseObject(chain, val, options));
-    } else {
-      var cleanRoot = root[0] === '[' && root[root.length - 1] === ']' ? root.slice(1, root.length - 1) : root;
-      var index = parseInt(cleanRoot, 10);
-      var indexString = '' + index;
-      if (!isNaN(index) && root !== cleanRoot && indexString === cleanRoot && index >= 0 && index <= options.arrayLimit) {
-        obj = [];
-        obj[index] = internals.parseObject(chain, val, options);
-      } else {
-        obj[cleanRoot] = internals.parseObject(chain, val, options);
-      }
-    }
-    return obj;
-  };
-  internals.parseKeys = function(key, val, options) {
-    if (!key) {
-      return ;
-    }
-    var parent = /^([^\[\]]*)/;
-    var child = /(\[[^\[\]]*\])/g;
-    var segment = parent.exec(key);
-    if (Object.prototype.hasOwnProperty(segment[1])) {
-      return ;
-    }
-    var keys = [];
-    if (segment[1]) {
-      keys.push(segment[1]);
-    }
-    var i = 0;
-    while ((segment = child.exec(key)) !== null && i < options.depth) {
-      ++i;
-      if (!Object.prototype.hasOwnProperty(segment[1].replace(/\[|\]/g, ''))) {
-        keys.push(segment[1]);
-      }
-    }
-    if (segment) {
-      keys.push('[' + key.slice(segment.index) + ']');
-    }
-    return internals.parseObject(keys, val, options);
-  };
-  module.exports = function(str, options) {
-    if (str === '' || str === null || typeof str === 'undefined') {
-      return {};
-    }
-    options = options || {};
-    options.delimiter = typeof options.delimiter === 'string' || Utils.isRegExp(options.delimiter) ? options.delimiter : internals.delimiter;
-    options.depth = typeof options.depth === 'number' ? options.depth : internals.depth;
-    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : internals.arrayLimit;
-    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : internals.parameterLimit;
-    var tempObj = typeof str === 'string' ? internals.parseValues(str, options) : str;
-    var obj = {};
-    var keys = Object.keys(tempObj);
-    for (var i = 0,
-        il = keys.length; i < il; ++i) {
-      var key = keys[i];
-      var newObj = internals.parseKeys(key, tempObj[key], options);
-      obj = Utils.merge(obj, newObj);
-    }
-    return Utils.compact(obj);
-  };
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/components/ContextWrapper", ["npm:react@0.13.3"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var _classCallCheck = function(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError('Cannot call a class as a function');
-    }
-  };
-  var _createClass = (function() {
-    function defineProperties(target, props) {
-      for (var i = 0; i < props.length; i++) {
-        var descriptor = props[i];
-        descriptor.enumerable = descriptor.enumerable || false;
-        descriptor.configurable = true;
-        if ('value' in descriptor)
-          descriptor.writable = true;
-        Object.defineProperty(target, descriptor.key, descriptor);
-      }
-    }
-    return function(Constructor, protoProps, staticProps) {
-      if (protoProps)
-        defineProperties(Constructor.prototype, protoProps);
-      if (staticProps)
-        defineProperties(Constructor, staticProps);
-      return Constructor;
-    };
-  })();
-  var _inherits = function(subClass, superClass) {
-    if (typeof superClass !== 'function' && superClass !== null) {
-      throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {
-        value: subClass,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }});
-    if (superClass)
-      subClass.__proto__ = superClass;
-  };
-  var React = require("npm:react@0.13.3");
-  var ContextWrapper = (function(_React$Component) {
-    function ContextWrapper() {
-      _classCallCheck(this, ContextWrapper);
-      if (_React$Component != null) {
-        _React$Component.apply(this, arguments);
-      }
-    }
-    _inherits(ContextWrapper, _React$Component);
-    _createClass(ContextWrapper, [{
-      key: 'render',
-      value: function render() {
-        return this.props.children;
-      }
-    }]);
-    return ContextWrapper;
-  })(React.Component);
-  module.exports = ContextWrapper;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/components/Route", ["npm:react@0.13.3", "npm:react@0.13.3/lib/invariant", "npm:react-router@0.13.3/lib/PropTypes", "npm:react-router@0.13.3/lib/components/RouteHandler"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var _classCallCheck = function(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError('Cannot call a class as a function');
-    }
-  };
-  var _createClass = (function() {
-    function defineProperties(target, props) {
-      for (var i = 0; i < props.length; i++) {
-        var descriptor = props[i];
-        descriptor.enumerable = descriptor.enumerable || false;
-        descriptor.configurable = true;
-        if ('value' in descriptor)
-          descriptor.writable = true;
-        Object.defineProperty(target, descriptor.key, descriptor);
-      }
-    }
-    return function(Constructor, protoProps, staticProps) {
-      if (protoProps)
-        defineProperties(Constructor.prototype, protoProps);
-      if (staticProps)
-        defineProperties(Constructor, staticProps);
-      return Constructor;
-    };
-  })();
-  var _inherits = function(subClass, superClass) {
-    if (typeof superClass !== 'function' && superClass !== null) {
-      throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {
-        value: subClass,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }});
-    if (superClass)
-      subClass.__proto__ = superClass;
-  };
-  var React = require("npm:react@0.13.3");
-  var invariant = require("npm:react@0.13.3/lib/invariant");
-  var PropTypes = require("npm:react-router@0.13.3/lib/PropTypes");
-  var RouteHandler = require("npm:react-router@0.13.3/lib/components/RouteHandler");
-  var Route = (function(_React$Component) {
-    function Route() {
-      _classCallCheck(this, Route);
-      if (_React$Component != null) {
-        _React$Component.apply(this, arguments);
-      }
-    }
-    _inherits(Route, _React$Component);
-    _createClass(Route, [{
-      key: 'render',
-      value: function render() {
-        invariant(false, '%s elements are for router configuration only and should not be rendered', this.constructor.name);
-      }
-    }]);
-    return Route;
-  })(React.Component);
-  Route.propTypes = {
-    name: PropTypes.string,
-    path: PropTypes.string,
-    handler: PropTypes.func,
-    ignoreScrollBehavior: PropTypes.bool
-  };
-  Route.defaultProps = {handler: RouteHandler};
-  module.exports = Route;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/components/Link", ["npm:react@0.13.3", "npm:react@0.13.3/lib/Object.assign", "npm:react-router@0.13.3/lib/PropTypes"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var _classCallCheck = function(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError('Cannot call a class as a function');
-    }
-  };
-  var _createClass = (function() {
-    function defineProperties(target, props) {
-      for (var i = 0; i < props.length; i++) {
-        var descriptor = props[i];
-        descriptor.enumerable = descriptor.enumerable || false;
-        descriptor.configurable = true;
-        if ('value' in descriptor)
-          descriptor.writable = true;
-        Object.defineProperty(target, descriptor.key, descriptor);
-      }
-    }
-    return function(Constructor, protoProps, staticProps) {
-      if (protoProps)
-        defineProperties(Constructor.prototype, protoProps);
-      if (staticProps)
-        defineProperties(Constructor, staticProps);
-      return Constructor;
-    };
-  })();
-  var _inherits = function(subClass, superClass) {
-    if (typeof superClass !== 'function' && superClass !== null) {
-      throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {
-        value: subClass,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }});
-    if (superClass)
-      subClass.__proto__ = superClass;
-  };
-  var React = require("npm:react@0.13.3");
-  var assign = require("npm:react@0.13.3/lib/Object.assign");
-  var PropTypes = require("npm:react-router@0.13.3/lib/PropTypes");
-  function isLeftClickEvent(event) {
-    return event.button === 0;
-  }
-  function isModifiedEvent(event) {
-    return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
-  }
-  var Link = (function(_React$Component) {
-    function Link() {
-      _classCallCheck(this, Link);
-      if (_React$Component != null) {
-        _React$Component.apply(this, arguments);
-      }
-    }
-    _inherits(Link, _React$Component);
-    _createClass(Link, [{
-      key: 'handleClick',
-      value: function handleClick(event) {
-        var allowTransition = true;
-        var clickResult;
-        if (this.props.onClick)
-          clickResult = this.props.onClick(event);
-        if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
-          return ;
-        }
-        if (clickResult === false || event.defaultPrevented === true)
-          allowTransition = false;
-        event.preventDefault();
-        if (allowTransition)
-          this.context.router.transitionTo(this.props.to, this.props.params, this.props.query);
-      }
-    }, {
-      key: 'getHref',
-      value: function getHref() {
-        return this.context.router.makeHref(this.props.to, this.props.params, this.props.query);
-      }
-    }, {
-      key: 'getClassName',
-      value: function getClassName() {
-        var className = this.props.className;
-        if (this.getActiveState())
-          className += ' ' + this.props.activeClassName;
-        return className;
-      }
-    }, {
-      key: 'getActiveState',
-      value: function getActiveState() {
-        return this.context.router.isActive(this.props.to, this.props.params, this.props.query);
-      }
-    }, {
-      key: 'render',
-      value: function render() {
-        var props = assign({}, this.props, {
-          href: this.getHref(),
-          className: this.getClassName(),
-          onClick: this.handleClick.bind(this)
-        });
-        if (props.activeStyle && this.getActiveState())
-          props.style = props.activeStyle;
-        return React.DOM.a(props, this.props.children);
-      }
-    }]);
-    return Link;
-  })(React.Component);
-  Link.contextTypes = {router: PropTypes.router.isRequired};
-  Link.propTypes = {
-    activeClassName: PropTypes.string.isRequired,
-    to: PropTypes.oneOfType([PropTypes.string, PropTypes.route]).isRequired,
-    params: PropTypes.object,
-    query: PropTypes.object,
-    activeStyle: PropTypes.object,
-    onClick: PropTypes.func
-  };
-  Link.defaultProps = {
-    activeClassName: 'active',
-    className: ''
-  };
-  module.exports = Link;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/components/NotFoundRoute", ["npm:react-router@0.13.3/lib/PropTypes", "npm:react-router@0.13.3/lib/components/RouteHandler", "npm:react-router@0.13.3/lib/components/Route"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var _classCallCheck = function(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError('Cannot call a class as a function');
-    }
-  };
-  var _inherits = function(subClass, superClass) {
-    if (typeof superClass !== 'function' && superClass !== null) {
-      throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {
-        value: subClass,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }});
-    if (superClass)
-      subClass.__proto__ = superClass;
-  };
-  var PropTypes = require("npm:react-router@0.13.3/lib/PropTypes");
-  var RouteHandler = require("npm:react-router@0.13.3/lib/components/RouteHandler");
-  var Route = require("npm:react-router@0.13.3/lib/components/Route");
-  var NotFoundRoute = (function(_Route) {
-    function NotFoundRoute() {
-      _classCallCheck(this, NotFoundRoute);
-      if (_Route != null) {
-        _Route.apply(this, arguments);
-      }
-    }
-    _inherits(NotFoundRoute, _Route);
-    return NotFoundRoute;
-  })(Route);
-  NotFoundRoute.propTypes = {
-    name: PropTypes.string,
-    path: PropTypes.falsy,
-    children: PropTypes.falsy,
-    handler: PropTypes.func.isRequired
-  };
-  NotFoundRoute.defaultProps = {handler: RouteHandler};
-  module.exports = NotFoundRoute;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/components/Redirect", ["npm:react-router@0.13.3/lib/PropTypes", "npm:react-router@0.13.3/lib/components/Route"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var _classCallCheck = function(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError('Cannot call a class as a function');
-    }
-  };
-  var _inherits = function(subClass, superClass) {
-    if (typeof superClass !== 'function' && superClass !== null) {
-      throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {
-        value: subClass,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }});
-    if (superClass)
-      subClass.__proto__ = superClass;
-  };
-  var PropTypes = require("npm:react-router@0.13.3/lib/PropTypes");
-  var Route = require("npm:react-router@0.13.3/lib/components/Route");
-  var Redirect = (function(_Route) {
-    function Redirect() {
-      _classCallCheck(this, Redirect);
-      if (_Route != null) {
-        _Route.apply(this, arguments);
-      }
-    }
-    _inherits(Redirect, _Route);
-    return Redirect;
-  })(Route);
-  Redirect.propTypes = {
-    path: PropTypes.string,
-    from: PropTypes.string,
-    to: PropTypes.string,
-    handler: PropTypes.falsy
-  };
-  Redirect.defaultProps = {};
-  module.exports = Redirect;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/actions/LocationActions", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var LocationActions = {
-    PUSH: 'push',
-    REPLACE: 'replace',
-    POP: 'pop'
-  };
-  module.exports = LocationActions;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/History", ["npm:react@0.13.3/lib/invariant", "npm:react@0.13.3/lib/ExecutionEnvironment"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var invariant = require("npm:react@0.13.3/lib/invariant");
-  var canUseDOM = require("npm:react@0.13.3/lib/ExecutionEnvironment").canUseDOM;
-  var History = {
-    length: 1,
-    back: function back() {
-      invariant(canUseDOM, 'Cannot use History.back without a DOM');
-      History.length -= 1;
-      window.history.back();
-    }
-  };
-  module.exports = History;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/locations/HistoryLocation", ["npm:react-router@0.13.3/lib/actions/LocationActions", "npm:react-router@0.13.3/lib/History"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var LocationActions = require("npm:react-router@0.13.3/lib/actions/LocationActions");
-  var History = require("npm:react-router@0.13.3/lib/History");
-  var _listeners = [];
-  var _isListening = false;
-  function notifyChange(type) {
-    var change = {
-      path: HistoryLocation.getCurrentPath(),
-      type: type
-    };
-    _listeners.forEach(function(listener) {
-      listener.call(HistoryLocation, change);
-    });
-  }
-  function onPopState(event) {
-    if (event.state === undefined) {
-      return ;
-    }
-    notifyChange(LocationActions.POP);
-  }
-  var HistoryLocation = {
-    addChangeListener: function addChangeListener(listener) {
-      _listeners.push(listener);
-      if (!_isListening) {
-        if (window.addEventListener) {
-          window.addEventListener('popstate', onPopState, false);
-        } else {
-          window.attachEvent('onpopstate', onPopState);
-        }
-        _isListening = true;
-      }
-    },
-    removeChangeListener: function removeChangeListener(listener) {
-      _listeners = _listeners.filter(function(l) {
-        return l !== listener;
-      });
-      if (_listeners.length === 0) {
-        if (window.addEventListener) {
-          window.removeEventListener('popstate', onPopState, false);
-        } else {
-          window.removeEvent('onpopstate', onPopState);
-        }
-        _isListening = false;
-      }
-    },
-    push: function push(path) {
-      window.history.pushState({path: path}, '', path);
-      History.length += 1;
-      notifyChange(LocationActions.PUSH);
-    },
-    replace: function replace(path) {
-      window.history.replaceState({path: path}, '', path);
-      notifyChange(LocationActions.REPLACE);
-    },
-    pop: History.back,
-    getCurrentPath: function getCurrentPath() {
-      return decodeURI(window.location.pathname + window.location.search);
-    },
-    toString: function toString() {
-      return '<HistoryLocation>';
-    }
-  };
-  module.exports = HistoryLocation;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/locations/RefreshLocation", ["npm:react-router@0.13.3/lib/locations/HistoryLocation", "npm:react-router@0.13.3/lib/History"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var HistoryLocation = require("npm:react-router@0.13.3/lib/locations/HistoryLocation");
-  var History = require("npm:react-router@0.13.3/lib/History");
-  var RefreshLocation = {
-    push: function push(path) {
-      window.location = path;
-    },
-    replace: function replace(path) {
-      window.location.replace(path);
-    },
-    pop: History.back,
-    getCurrentPath: HistoryLocation.getCurrentPath,
-    toString: function toString() {
-      return '<RefreshLocation>';
-    }
-  };
-  module.exports = RefreshLocation;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/locations/StaticLocation", ["npm:react@0.13.3/lib/invariant"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var _classCallCheck = function(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError('Cannot call a class as a function');
-    }
-  };
-  var _createClass = (function() {
-    function defineProperties(target, props) {
-      for (var i = 0; i < props.length; i++) {
-        var descriptor = props[i];
-        descriptor.enumerable = descriptor.enumerable || false;
-        descriptor.configurable = true;
-        if ('value' in descriptor)
-          descriptor.writable = true;
-        Object.defineProperty(target, descriptor.key, descriptor);
-      }
-    }
-    return function(Constructor, protoProps, staticProps) {
-      if (protoProps)
-        defineProperties(Constructor.prototype, protoProps);
-      if (staticProps)
-        defineProperties(Constructor, staticProps);
-      return Constructor;
-    };
-  })();
-  var invariant = require("npm:react@0.13.3/lib/invariant");
-  function throwCannotModify() {
-    invariant(false, 'You cannot modify a static location');
-  }
-  var StaticLocation = (function() {
-    function StaticLocation(path) {
-      _classCallCheck(this, StaticLocation);
-      this.path = path;
-    }
-    _createClass(StaticLocation, [{
-      key: 'getCurrentPath',
-      value: function getCurrentPath() {
-        return this.path;
-      }
-    }, {
-      key: 'toString',
-      value: function toString() {
-        return '<StaticLocation path="' + this.path + '">';
-      }
-    }]);
-    return StaticLocation;
-  })();
-  StaticLocation.prototype.push = throwCannotModify;
-  StaticLocation.prototype.replace = throwCannotModify;
-  StaticLocation.prototype.pop = throwCannotModify;
-  module.exports = StaticLocation;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/locations/TestLocation", ["npm:react@0.13.3/lib/invariant", "npm:react-router@0.13.3/lib/actions/LocationActions", "npm:react-router@0.13.3/lib/History"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var _classCallCheck = function(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError('Cannot call a class as a function');
-    }
-  };
-  var _createClass = (function() {
-    function defineProperties(target, props) {
-      for (var i = 0; i < props.length; i++) {
-        var descriptor = props[i];
-        descriptor.enumerable = descriptor.enumerable || false;
-        descriptor.configurable = true;
-        if ('value' in descriptor)
-          descriptor.writable = true;
-        Object.defineProperty(target, descriptor.key, descriptor);
-      }
-    }
-    return function(Constructor, protoProps, staticProps) {
-      if (protoProps)
-        defineProperties(Constructor.prototype, protoProps);
-      if (staticProps)
-        defineProperties(Constructor, staticProps);
-      return Constructor;
-    };
-  })();
-  var invariant = require("npm:react@0.13.3/lib/invariant");
-  var LocationActions = require("npm:react-router@0.13.3/lib/actions/LocationActions");
-  var History = require("npm:react-router@0.13.3/lib/History");
-  var TestLocation = (function() {
-    function TestLocation(history) {
-      _classCallCheck(this, TestLocation);
-      this.history = history || [];
-      this.listeners = [];
-      this._updateHistoryLength();
-    }
-    _createClass(TestLocation, [{
-      key: 'needsDOM',
-      get: function() {
-        return false;
-      }
-    }, {
-      key: '_updateHistoryLength',
-      value: function _updateHistoryLength() {
-        History.length = this.history.length;
-      }
-    }, {
-      key: '_notifyChange',
-      value: function _notifyChange(type) {
-        var change = {
-          path: this.getCurrentPath(),
-          type: type
-        };
-        for (var i = 0,
-            len = this.listeners.length; i < len; ++i)
-          this.listeners[i].call(this, change);
-      }
-    }, {
-      key: 'addChangeListener',
-      value: function addChangeListener(listener) {
-        this.listeners.push(listener);
-      }
-    }, {
-      key: 'removeChangeListener',
-      value: function removeChangeListener(listener) {
-        this.listeners = this.listeners.filter(function(l) {
-          return l !== listener;
-        });
-      }
-    }, {
-      key: 'push',
-      value: function push(path) {
-        this.history.push(path);
-        this._updateHistoryLength();
-        this._notifyChange(LocationActions.PUSH);
-      }
-    }, {
-      key: 'replace',
-      value: function replace(path) {
-        invariant(this.history.length, 'You cannot replace the current path with no history');
-        this.history[this.history.length - 1] = path;
-        this._notifyChange(LocationActions.REPLACE);
-      }
-    }, {
-      key: 'pop',
-      value: function pop() {
-        this.history.pop();
-        this._updateHistoryLength();
-        this._notifyChange(LocationActions.POP);
-      }
-    }, {
-      key: 'getCurrentPath',
-      value: function getCurrentPath() {
-        return this.history[this.history.length - 1];
-      }
-    }, {
-      key: 'toString',
-      value: function toString() {
-        return '<TestLocation>';
-      }
-    }]);
-    return TestLocation;
-  })();
-  module.exports = TestLocation;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/behaviors/ImitateBrowserBehavior", ["npm:react-router@0.13.3/lib/actions/LocationActions"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var LocationActions = require("npm:react-router@0.13.3/lib/actions/LocationActions");
-  var ImitateBrowserBehavior = {updateScrollPosition: function updateScrollPosition(position, actionType) {
-      switch (actionType) {
-        case LocationActions.PUSH:
-        case LocationActions.REPLACE:
-          window.scrollTo(0, 0);
-          break;
-        case LocationActions.POP:
-          if (position) {
-            window.scrollTo(position.x, position.y);
-          } else {
-            window.scrollTo(0, 0);
-          }
-          break;
-      }
-    }};
-  module.exports = ImitateBrowserBehavior;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/behaviors/ScrollToTopBehavior", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  "use strict";
-  var ScrollToTopBehavior = {updateScrollPosition: function updateScrollPosition() {
-      window.scrollTo(0, 0);
-    }};
-  module.exports = ScrollToTopBehavior;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/Navigation", ["npm:react-router@0.13.3/lib/PropTypes"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var PropTypes = require("npm:react-router@0.13.3/lib/PropTypes");
-  var Navigation = {
-    contextTypes: {router: PropTypes.router.isRequired},
-    makePath: function makePath(to, params, query) {
-      return this.context.router.makePath(to, params, query);
-    },
-    makeHref: function makeHref(to, params, query) {
-      return this.context.router.makeHref(to, params, query);
-    },
-    transitionTo: function transitionTo(to, params, query) {
-      this.context.router.transitionTo(to, params, query);
-    },
-    replaceWith: function replaceWith(to, params, query) {
-      this.context.router.replaceWith(to, params, query);
-    },
-    goBack: function goBack() {
-      return this.context.router.goBack();
-    }
-  };
-  module.exports = Navigation;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/State", ["npm:react-router@0.13.3/lib/PropTypes"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var PropTypes = require("npm:react-router@0.13.3/lib/PropTypes");
-  var State = {
-    contextTypes: {router: PropTypes.router.isRequired},
-    getPath: function getPath() {
-      return this.context.router.getCurrentPath();
-    },
-    getPathname: function getPathname() {
-      return this.context.router.getCurrentPathname();
-    },
-    getParams: function getParams() {
-      return this.context.router.getCurrentParams();
-    },
-    getQuery: function getQuery() {
-      return this.context.router.getCurrentQuery();
-    },
-    getRoutes: function getRoutes() {
-      return this.context.router.getCurrentRoutes();
-    },
-    isActive: function isActive(to, params, query) {
-      return this.context.router.isActive(to, params, query);
-    }
-  };
-  module.exports = State;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/createRoutesFromReactChildren", ["npm:react@0.13.3", "npm:react@0.13.3/lib/Object.assign", "npm:react@0.13.3/lib/warning", "npm:react-router@0.13.3/lib/components/DefaultRoute", "npm:react-router@0.13.3/lib/components/NotFoundRoute", "npm:react-router@0.13.3/lib/components/Redirect", "npm:react-router@0.13.3/lib/Route"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var React = require("npm:react@0.13.3");
-  var assign = require("npm:react@0.13.3/lib/Object.assign");
-  var warning = require("npm:react@0.13.3/lib/warning");
-  var DefaultRoute = require("npm:react-router@0.13.3/lib/components/DefaultRoute");
-  var NotFoundRoute = require("npm:react-router@0.13.3/lib/components/NotFoundRoute");
-  var Redirect = require("npm:react-router@0.13.3/lib/components/Redirect");
-  var Route = require("npm:react-router@0.13.3/lib/Route");
-  function checkPropTypes(componentName, propTypes, props) {
-    componentName = componentName || 'UnknownComponent';
-    for (var propName in propTypes) {
-      if (propTypes.hasOwnProperty(propName)) {
-        var error = propTypes[propName](props, propName, componentName);
-        if (error instanceof Error)
-          warning(false, error.message);
-      }
-    }
-  }
-  function createRouteOptions(props) {
-    var options = assign({}, props);
-    var handler = options.handler;
-    if (handler) {
-      options.onEnter = handler.willTransitionTo;
-      options.onLeave = handler.willTransitionFrom;
-    }
-    return options;
-  }
-  function createRouteFromReactElement(element) {
-    if (!React.isValidElement(element)) {
-      return ;
-    }
-    var type = element.type;
-    var props = assign({}, type.defaultProps, element.props);
-    if (type.propTypes)
-      checkPropTypes(type.displayName, type.propTypes, props);
-    if (type === DefaultRoute) {
-      return Route.createDefaultRoute(createRouteOptions(props));
-    }
-    if (type === NotFoundRoute) {
-      return Route.createNotFoundRoute(createRouteOptions(props));
-    }
-    if (type === Redirect) {
-      return Route.createRedirect(createRouteOptions(props));
-    }
-    return Route.createRoute(createRouteOptions(props), function() {
-      if (props.children)
-        createRoutesFromReactChildren(props.children);
-    });
-  }
-  function createRoutesFromReactChildren(children) {
-    var routes = [];
-    React.Children.forEach(children, function(child) {
-      if (child = createRouteFromReactElement(child))
-        routes.push(child);
-    });
-    return routes;
-  }
-  module.exports = createRoutesFromReactChildren;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/getWindowScrollPosition", ["npm:react@0.13.3/lib/invariant", "npm:react@0.13.3/lib/ExecutionEnvironment"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var invariant = require("npm:react@0.13.3/lib/invariant");
-  var canUseDOM = require("npm:react@0.13.3/lib/ExecutionEnvironment").canUseDOM;
-  function getWindowScrollPosition() {
-    invariant(canUseDOM, 'Cannot get current scroll position without a DOM');
-    return {
-      x: window.pageXOffset || document.documentElement.scrollLeft,
-      y: window.pageYOffset || document.documentElement.scrollTop
-    };
-  }
-  module.exports = getWindowScrollPosition;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/isReactChildren", ["npm:react@0.13.3"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var React = require("npm:react@0.13.3");
-  function isValidChild(object) {
-    return object == null || React.isValidElement(object);
-  }
-  function isReactChildren(object) {
-    return isValidChild(object) || Array.isArray(object) && object.every(isValidChild);
-  }
-  module.exports = isReactChildren;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/Cancellation", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  "use strict";
-  function Cancellation() {}
-  module.exports = Cancellation;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/Redirect", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  "use strict";
-  function Redirect(to, params, query) {
-    this.to = to;
-    this.params = params;
-    this.query = query;
-  }
-  module.exports = Redirect;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/Match", ["npm:react-router@0.13.3/lib/PathUtils"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var _classCallCheck = function(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError('Cannot call a class as a function');
-    }
-  };
-  var _createClass = (function() {
-    function defineProperties(target, props) {
-      for (var i = 0; i < props.length; i++) {
-        var descriptor = props[i];
-        descriptor.enumerable = descriptor.enumerable || false;
-        descriptor.configurable = true;
-        if ('value' in descriptor)
-          descriptor.writable = true;
-        Object.defineProperty(target, descriptor.key, descriptor);
-      }
-    }
-    return function(Constructor, protoProps, staticProps) {
-      if (protoProps)
-        defineProperties(Constructor.prototype, protoProps);
-      if (staticProps)
-        defineProperties(Constructor, staticProps);
-      return Constructor;
-    };
-  })();
-  var PathUtils = require("npm:react-router@0.13.3/lib/PathUtils");
-  function deepSearch(route, pathname, query) {
-    var childRoutes = route.childRoutes;
-    if (childRoutes) {
-      var match,
-          childRoute;
-      for (var i = 0,
-          len = childRoutes.length; i < len; ++i) {
-        childRoute = childRoutes[i];
-        if (childRoute.isDefault || childRoute.isNotFound)
-          continue;
-        if (match = deepSearch(childRoute, pathname, query)) {
-          match.routes.unshift(route);
-          return match;
-        }
-      }
-    }
-    var defaultRoute = route.defaultRoute;
-    if (defaultRoute && (params = PathUtils.extractParams(defaultRoute.path, pathname))) {
-      return new Match(pathname, params, query, [route, defaultRoute]);
-    }
-    var notFoundRoute = route.notFoundRoute;
-    if (notFoundRoute && (params = PathUtils.extractParams(notFoundRoute.path, pathname))) {
-      return new Match(pathname, params, query, [route, notFoundRoute]);
-    }
-    var params = PathUtils.extractParams(route.path, pathname);
-    if (params) {
-      return new Match(pathname, params, query, [route]);
-    }
-    return null;
-  }
-  var Match = (function() {
-    function Match(pathname, params, query, routes) {
-      _classCallCheck(this, Match);
-      this.pathname = pathname;
-      this.params = params;
-      this.query = query;
-      this.routes = routes;
-    }
-    _createClass(Match, null, [{
-      key: 'findMatch',
-      value: function findMatch(routes, path) {
-        var pathname = PathUtils.withoutQuery(path);
-        var query = PathUtils.extractQuery(path);
-        var match = null;
-        for (var i = 0,
-            len = routes.length; match == null && i < len; ++i)
-          match = deepSearch(routes[i], pathname, query);
-        return match;
-      }
-    }]);
-    return Match;
-  })();
-  module.exports = Match;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/supportsHistory", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  function supportsHistory() {
-    var ua = navigator.userAgent;
-    if ((ua.indexOf('Android 2.') !== -1 || ua.indexOf('Android 4.0') !== -1) && ua.indexOf('Mobile Safari') !== -1 && ua.indexOf('Chrome') === -1 && ua.indexOf('Windows Phone') === -1) {
-      return false;
-    }
-    return window.history && 'pushState' in window.history;
-  }
-  module.exports = supportsHistory;
-  global.define = __define;
-  return module.exports;
-});
-
-System.register("npm:react-router@0.13.3/lib/runRouter", ["npm:react-router@0.13.3/lib/createRouter"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  'use strict';
-  var createRouter = require("npm:react-router@0.13.3/lib/createRouter");
-  function runRouter(routes, location, callback) {
-    if (typeof location === 'function') {
-      callback = location;
-      location = null;
-    }
-    var router = createRouter({
-      routes: routes,
-      location: location
-    });
-    router.run(callback);
-    return router;
-  }
-  module.exports = runRouter;
-  global.define = __define;
-  return module.exports;
-});
-
 System.register("npm:process@0.10.1", ["npm:process@0.10.1/browser"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -17876,14 +17876,6 @@ System.register("npm:lodash@3.9.3", ["npm:lodash@3.9.3/index"], true, function(r
   return module.exports;
 });
 
-(function() {
-function define(){};  define.amd = {};
-System.register("github:components/jquery@2.1.4", ["github:components/jquery@2.1.4/jquery"], false, function(__require, __exports, __module) {
-  return (function(main) {
-    return main;
-  }).call(this, __require('github:components/jquery@2.1.4/jquery'));
-});
-})();
 System.register("npm:object-assign@2.0.0", ["npm:object-assign@2.0.0/index"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -18296,6 +18288,14 @@ System.register("npm:react-router@0.13.3/lib/Transition", ["npm:react-router@0.1
   return module.exports;
 });
 
+(function() {
+function define(){};  define.amd = {};
+System.register("github:components/jquery@2.1.4", ["github:components/jquery@2.1.4/jquery"], false, function(__require, __exports, __module) {
+  return (function(main) {
+    return main;
+  }).call(this, __require('github:components/jquery@2.1.4/jquery'));
+});
+})();
 System.register("github:jspm/nodelibs-process@0.1.1/index", ["npm:process@0.10.1"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -23137,122 +23137,6 @@ System.register("build/js/pages/alarm", ["npm:react@0.13.3"], function($__export
   };
 });
 
-System.register("build/js/pages/home", ["npm:react@0.13.3", "npm:lodash@3.9.3"], function($__export) {
-  "use strict";
-  var __moduleName = "build/js/pages/home";
-  var React,
-      _,
-      Minis,
-      App;
-  return {
-    setters: [function($__m) {
-      React = $__m.default;
-    }, function($__m) {
-      _ = $__m.default;
-    }],
-    execute: function() {
-      Minis = React.createClass({
-        displayName: "Minis",
-        handleClick: function(event) {
-          var el = event.target,
-              activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
-          console.log(("tapped " + el.textContent));
-          if (confirm(("Do you want to ACTIVATE " + el.textContent + "?"))) {
-            console.log('YES');
-            activated.push(el.textContent);
-            localStorage.setItem('activated-mini-apps', JSON.stringify(activated));
-            console.log(activated);
-          }
-        },
-        _touch: {},
-        touch: function(event) {
-          var now = Date.now(),
-              el = event.target,
-              type = event.type;
-          if (type === 'touchstart') {
-            this._touch.started = Date.now();
-          } else if (type === 'touchend') {
-            var duration = this._touch.started && now - this._touch.started;
-            console.log(duration);
-            event.preventDefault();
-            event.stopPropagation();
-            if (duration > 500) {
-              if (confirm(("Do you want to REMOVE " + el.textContent + "?"))) {
-                var activated = (function() {
-                  return JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
-                });
-                localStorage.setItem('activated-mini-apps', JSON.stringify(_.without(activated(), el.textContent)));
-                console.log(activated());
-              }
-            } else if (duration > 0) {
-              return this.handleClick(event);
-            }
-            delete this._touch.started;
-          } else if (type === 'touchcancel') {
-            delete this._touch.started;
-          } else if (type === 'touchmove') {
-            delete this._touch.started;
-          }
-        },
-        render: function() {
-          var $__0 = this;
-          var minis = this.props.minis;
-          return (React.createElement("div", null, _.chunk(minis, 2).map((function(minis2, i) {
-            return (React.createElement("div", {
-              key: i,
-              className: "row minis"
-            }, React.createElement("div", {
-              className: "col",
-              onTouchStart: $__0.touch,
-              onTouchEnd: $__0.touch,
-              onTouchCancel: $__0.touch,
-              onTouchMove: $__0.touch
-            }, React.createElement("img", {src: "http://placehold.it/300x300"})), React.createElement("div", {
-              className: "col",
-              onTouchStart: $__0.touch,
-              onTouchEnd: $__0.touch,
-              onTouchCancel: $__0.touch,
-              onTouchMove: $__0.touch
-            }, React.createElement("img", {src: "http://placehold.it/300x300"}))));
-          }))));
-        }
-      });
-      App = React.createClass({
-        displayName: "App",
-        render: function() {
-          var minis = [{
-            name: 'SOS',
-            logo: ''
-          }, {
-            name: 'CrimeMapper',
-            logo: ''
-          }, {
-            name: 'example app',
-            logo: ''
-          }, {
-            name: 'example app',
-            logo: ''
-          }, {
-            name: 'example app',
-            logo: ''
-          }, {
-            name: 'example app',
-            logo: ''
-          }, {
-            name: 'example app',
-            logo: ''
-          }, {
-            name: 'example app',
-            logo: ''
-          }];
-          return (React.createElement("div", null, React.createElement("h1", null, "HOMEPAGE"), React.createElement(Minis, {minis: minis})));
-        }
-      });
-      $__export('default', App);
-    }
-  };
-});
-
 System.register("build/js/pages/map", ["npm:react@0.13.3", "github:components/jquery@2.1.4"], function($__export) {
   "use strict";
   var __moduleName = "build/js/pages/map";
@@ -23330,6 +23214,144 @@ System.register("build/js/pages/map", ["npm:react@0.13.3", "github:components/jq
   };
 });
 
+System.register("build/js/pages/home", ["npm:react@0.13.3", "npm:lodash@3.9.3", "npm:react-router@0.13.3"], function($__export) {
+  "use strict";
+  var __moduleName = "build/js/pages/home";
+  var React,
+      _,
+      Router,
+      Link,
+      Minis,
+      App;
+  return {
+    setters: [function($__m) {
+      React = $__m.default;
+    }, function($__m) {
+      _ = $__m.default;
+    }, function($__m) {
+      Router = $__m.default;
+    }],
+    execute: function() {
+      Link = Router.Link;
+      Minis = React.createClass({
+        displayName: "Minis",
+        handleClick: function(event) {
+          var el = event.target,
+              activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
+          activated.push(el.textContent);
+          localStorage.setItem('activated-mini-apps', JSON.stringify(activated));
+          el.parentNode.classList.add('activated');
+        },
+        _touch: {},
+        touch: function(event) {
+          var now = Date.now(),
+              el = event.target,
+              type = event.type;
+          if (type === 'touchstart') {
+            this._touch.started = Date.now();
+          } else if (type === 'touchend') {
+            var duration = this._touch.started && now - this._touch.started;
+            event.preventDefault();
+            event.stopPropagation();
+            if (duration > 300) {
+              var activated = (function() {
+                return JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
+              });
+              localStorage.setItem('activated-mini-apps', JSON.stringify(_.without(activated(), el.textContent)));
+              el.parentNode.classList.remove('activated');
+            } else if (duration > 0) {
+              return this.handleClick(event);
+            }
+            delete this._touch.started;
+          } else if (type === 'touchcancel') {
+            delete this._touch.started;
+          } else if (type === 'touchmove') {
+            delete this._touch.started;
+          }
+        },
+        render: function() {
+          var $__0 = this;
+          var minis = this.props.minis;
+          return (React.createElement("div", null, _.chunk(minis, 2).map((function(minis2, i) {
+            var link0 = minis[i * 2].route ? React.createElement(Link, {
+              to: minis[i * 2].route,
+              className: "col",
+              onTouchStart: $__0.touch,
+              onTouchEnd: $__0.touch,
+              onTouchCancel: $__0.touch,
+              onTouchMove: $__0.touch
+            }, React.createElement("div", {className: "vert-helper"}), React.createElement("img", {src: ("build/img/icon-" + (i * 2 + 1) + ".png")})) : React.createElement("div", {
+              className: "col",
+              onTouchStart: $__0.touch,
+              onTouchEnd: $__0.touch,
+              onTouchCancel: $__0.touch,
+              onTouchMove: $__0.touch
+            }, React.createElement("div", {className: "vert-helper"}), React.createElement("img", {src: ("build/img/icon-" + (i * 2 + 1) + ".png")}));
+            var link1 = minis[i * 2 + 1].route ? React.createElement(Link, {
+              to: minis[i * 2].route,
+              className: "col",
+              onTouchStart: $__0.touch,
+              onTouchEnd: $__0.touch,
+              onTouchCancel: $__0.touch,
+              onTouchMove: $__0.touch
+            }, React.createElement("div", {className: "vert-helper"}), React.createElement("img", {src: ("build/img/icon-" + (i * 2 + 2) + ".png")})) : React.createElement("div", {
+              className: "col",
+              onTouchStart: $__0.touch,
+              onTouchEnd: $__0.touch,
+              onTouchCancel: $__0.touch,
+              onTouchMove: $__0.touch
+            }, React.createElement("div", {className: "vert-helper"}), React.createElement("img", {src: ("build/img/icon-" + (i * 2 + 2) + ".png")}));
+            return (React.createElement("div", {
+              key: i,
+              className: "row minis"
+            }, link0, link1));
+          }))));
+        }
+      });
+      App = React.createClass({
+        displayName: "App",
+        render: function() {
+          var minis = [{
+            name: 'CrimeMapper',
+            logo: '',
+            route: 'crimeMapper'
+          }, {
+            name: 'SOS',
+            logo: '',
+            route: 'SOS'
+          }, {
+            name: 'example app 3',
+            logo: '',
+            route: ''
+          }, {
+            name: 'example app 4',
+            logo: '',
+            route: ''
+          }, {
+            name: 'example app 5',
+            logo: '',
+            route: ''
+          }, {
+            name: 'example app 6',
+            logo: '',
+            route: ''
+          }, {
+            name: 'example app 7',
+            logo: '',
+            route: ''
+          }, {
+            name: 'example app 8',
+            logo: '',
+            route: ''
+          }];
+          return (React.createElement(Minis, {minis: minis}));
+        }
+      });
+      $__export('default', App);
+    }
+  };
+});
+
 System.register("build/js/main", ["npm:react@0.13.3", "build/js/pages/home", "build/js/pages/settings", "build/js/pages/map", "build/js/pages/alarm", "npm:react-router@0.13.3"], function($__export) {
   "use strict";
   var __moduleName = "build/js/main";
@@ -23337,7 +23359,7 @@ System.register("build/js/main", ["npm:react@0.13.3", "build/js/pages/home", "bu
       homePage,
       settingsPage,
       crimeMapper,
-      crimeAlarm,
+      SOS,
       Router,
       Route,
       DefaultRoute,
@@ -23357,7 +23379,7 @@ System.register("build/js/main", ["npm:react@0.13.3", "build/js/pages/home", "bu
     }, function($__m) {
       crimeMapper = $__m.default;
     }, function($__m) {
-      crimeAlarm = $__m.default;
+      SOS = $__m.default;
     }, function($__m) {
       Router = $__m.default;
     }],
@@ -23366,8 +23388,12 @@ System.register("build/js/main", ["npm:react@0.13.3", "build/js/pages/home", "bu
       Route = Router.Route, DefaultRoute = Router.DefaultRoute, NotFoundRoute = Router.NotFoundRoute, Redirect = Router.Redirect, RouteHandler = Router.RouteHandler, Link = Router.Link;
       App = React.createClass({
         displayName: "App",
+        mixins: [Router.Navigation],
         render: function() {
-          return (React.createElement("div", null, React.createElement("div", {className: "bar-positive bar bar-header disable-user-behavior"}, React.createElement("div", {className: "buttons"}, React.createElement(Link, {to: "settings"}, React.createElement("button", {className: "button"}, "Settings Icon"))), React.createElement("h1", {className: "title"}, "Ionic Styled header bar")), React.createElement("div", {className: "scroll-content ionic-scroll"}, React.createElement("div", {className: "scroll"}, React.createElement(RouteHandler, null)))));
+          return (React.createElement("div", null, React.createElement("div", {className: "bar-positive bar bar-header disable-user-behavior"}, React.createElement(Link, {to: "settings"}, React.createElement("button", {className: "button button-icon icon ion-navicon-round"})), React.createElement("h1", {className: "title"}, "CoPilot"), React.createElement("button", {
+            className: "button button-clear button-light",
+            onClick: this.goBack
+          }, "Back")), React.createElement("div", {className: "scroll-content ionic-scroll"}, React.createElement("div", {className: "scroll"}, React.createElement(RouteHandler, null)))));
         }
       });
       routes = (React.createElement(Route, {
@@ -23381,8 +23407,8 @@ System.register("build/js/main", ["npm:react@0.13.3", "build/js/pages/home", "bu
         name: "crimeMapper",
         handler: crimeMapper
       }), React.createElement(Route, {
-        name: "crimeAlarm",
-        handler: crimeAlarm
+        name: "SOS",
+        handler: SOS
       }), React.createElement(Route, {
         name: "settings",
         handler: settingsPage,

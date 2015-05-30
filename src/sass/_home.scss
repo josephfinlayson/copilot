@@ -1,0 +1,22 @@
+.minis {
+  img {
+    width: 100%;
+    padding: 3em;
+    vertical-align: center;
+  }
+  .vert-helper {
+    display: inline-block;
+    width: 0;
+    height: 100%;
+  }
+}
+
+.activated {
+  background-color: cornflowerblue;
+}
+
+.scroll {
+  max-height: 100%;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+}
