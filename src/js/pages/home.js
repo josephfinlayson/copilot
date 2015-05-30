@@ -12,13 +12,13 @@ var Minis = React.createClass({
   handleClick(event) {
     const el = event.target,
           activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
-    console.log(`tapped ${el.textContent}`);
-    if (confirm(`Do you want to ACTIVATE ${el.textContent}?`)) {
-      console.log('YES');
+    // console.log(`tapped ${el.textContent}`);
+    // if (confirm(`Do you want to ACTIVATE ${el.textContent}?`)) {
+      // console.log('YES');
       activated.push(el.textContent);
       localStorage.setItem('activated-mini-apps', JSON.stringify(activated));
-      console.log(activated);
-    }
+      // console.log(activated);
+    // }
   },
   _touch: {
     // started
@@ -31,18 +31,18 @@ var Minis = React.createClass({
         this._touch.started = Date.now();
       } else if (type === 'touchend') {
         const duration = this._touch.started && now - this._touch.started;
-        console.log(duration);
+        // console.log(duration);
         event.preventDefault();
         event.stopPropagation();
         if (duration > 500) {
-          if (confirm(`Do you want to REMOVE ${el.textContent}?`)) {
+          // if (confirm(`Do you want to REMOVE ${el.textContent}?`)) {
             const activated = () => JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
             localStorage.setItem(
               'activated-mini-apps',
               JSON.stringify(_.without(activated(), el.textContent))
             );
-            console.log(activated());
-          }
+            // console.log(activated());
+          // }
         } else if (duration > 0) {
           return this.handleClick(event);
         }

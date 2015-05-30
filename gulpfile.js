@@ -69,7 +69,7 @@ gulp.task('sass', function() {
 });
 
 // serve task
-gulp.task('serve', ['browser-sync', 'jsx', 'sass'] , function(cb) {
+gulp.task('serve', ['browser-sync', 'jsx', 'sass', 'img'] , function(cb) {
 
   plugins.watch(
     './src/sass/**/*.scss',
@@ -78,6 +78,17 @@ gulp.task('serve', ['browser-sync', 'jsx', 'sass'] , function(cb) {
     },
     function() {
       gulp.start('sass');
+    }
+  );
+
+
+  plugins.watch(
+    './src/img/**',
+    {
+      name: 'img'
+    },
+    function() {
+      gulp.start('img');
     }
   );
 
@@ -124,12 +135,17 @@ gulp.task('deployIOS', ['cordova'], plugins.shell.task([
 ]));
 
 
-gulp.task('cordova', ['bundle'], function(){
+gulp.task('cordova', ['bundle', 'sass'], function(){
+
   gulp.src('./index.html')
       .pipe(gulp.dest('cordova/www'))
 
+  gulp.src('src/img/**')
+      .pipe(gulp.dest('cordova/www/build/img'))
+
+
   gulp.src('build/css/**')
-      .pipe(gulp.dest('cordova/www/build/css/'))
+      .pipe(gulp.dest('cordova/www/build/css'))
 
 
   //gulp.src('node_modules/**')
@@ -161,6 +177,12 @@ gulp.task('css', function() {
     .pipe(plugins.rename('main.min.css'))
     .pipe(gulp.dest('./dist/css'))
     .on('error', plugins.util.log);
+});
+
+// img
+gulp.task('img', function() {
+  return gulp.src('./src/img/**')
+    .pipe(gulp.dest('./build/img'))
 });
 
 // Copy index.html to 'dist'
