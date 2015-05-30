@@ -3,7 +3,8 @@
     "dependencies": {
       "jquery": "github:components/jquery@^2.1.4",
       "lodash": "npm:lodash@^3.9.3",
-      "react-router": "npm:react-router@^0.13.3"
+      "react-router": "npm:react-router@^0.13.3",
+      "react-tap-event-plugin": "npm:react-tap-event-plugin@^0.1.7"
     },
     "devDependencies": {
       "traceur": "github:jmcriffey/bower-traceur@0.0.88",
@@ -30,6 +31,8 @@
     "run-sequence": "^1.0.2"
   },
   "dependencies": {
-    "gulp-plumber": "^1.0.1"
+    "gulp-plumber": "^1.0.1",
+    "react": "^0.13.3",
+    "react-tap-event-plugin": "^0.1.7"
   }
 }
