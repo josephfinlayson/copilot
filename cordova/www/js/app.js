@@ -23156,13 +23156,9 @@ System.register("build/js/pages/home", ["npm:react@0.13.3", "npm:lodash@3.9.3"],
         handleClick: function(event) {
           var el = event.target,
               activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
-          console.log(("tapped " + el.textContent));
-          if (confirm(("Do you want to ACTIVATE " + el.textContent + "?"))) {
-            console.log('YES');
-            activated.push(el.textContent);
-            localStorage.setItem('activated-mini-apps', JSON.stringify(activated));
-            console.log(activated);
-          }
+          activated.push(el.textContent);
+          localStorage.setItem('activated-mini-apps', JSON.stringify(activated));
+          el.parentNode.classList.add('activated');
         },
         _touch: {},
         touch: function(event) {
@@ -23173,17 +23169,14 @@ System.register("build/js/pages/home", ["npm:react@0.13.3", "npm:lodash@3.9.3"],
             this._touch.started = Date.now();
           } else if (type === 'touchend') {
             var duration = this._touch.started && now - this._touch.started;
-            console.log(duration);
             event.preventDefault();
             event.stopPropagation();
-            if (duration > 500) {
-              if (confirm(("Do you want to REMOVE " + el.textContent + "?"))) {
-                var activated = (function() {
-                  return JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
-                });
-                localStorage.setItem('activated-mini-apps', JSON.stringify(_.without(activated(), el.textContent)));
-                console.log(activated());
-              }
+            if (duration > 300) {
+              var activated = (function() {
+                return JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
+              });
+              localStorage.setItem('activated-mini-apps', JSON.stringify(_.without(activated(), el.textContent)));
+              el.parentNode.classList.remove('activated');
             } else if (duration > 0) {
               return this.handleClick(event);
             }
@@ -23207,13 +23200,13 @@ System.register("build/js/pages/home", ["npm:react@0.13.3", "npm:lodash@3.9.3"],
               onTouchEnd: $__0.touch,
               onTouchCancel: $__0.touch,
               onTouchMove: $__0.touch
-            }, React.createElement("img", {src: "http://placehold.it/300x300"})), React.createElement("div", {
+            }, React.createElement("div", {className: "vert-helper"}), React.createElement("img", {src: ("build/img/icon-" + (i * 2 + 1) + ".png")})), React.createElement("div", {
               className: "col",
               onTouchStart: $__0.touch,
               onTouchEnd: $__0.touch,
               onTouchCancel: $__0.touch,
               onTouchMove: $__0.touch
-            }, React.createElement("img", {src: "http://placehold.it/300x300"}))));
+            }, React.createElement("div", {className: "vert-helper"}), React.createElement("img", {src: ("build/img/icon-" + (i * 2 + 2) + ".png")}))));
           }))));
         }
       });
@@ -23227,22 +23220,22 @@ System.register("build/js/pages/home", ["npm:react@0.13.3", "npm:lodash@3.9.3"],
             name: 'CrimeMapper',
             logo: ''
           }, {
-            name: 'example app',
+            name: 'example app 3',
             logo: ''
           }, {
-            name: 'example app',
+            name: 'example app 4',
             logo: ''
           }, {
-            name: 'example app',
+            name: 'example app 5',
             logo: ''
           }, {
-            name: 'example app',
+            name: 'example app 6',
             logo: ''
           }, {
-            name: 'example app',
+            name: 'example app 7',
             logo: ''
           }, {
-            name: 'example app',
+            name: 'example app 8',
             logo: ''
           }];
           return (React.createElement("div", null, React.createElement("h1", null, "HOMEPAGE"), React.createElement(Minis, {minis: minis})));

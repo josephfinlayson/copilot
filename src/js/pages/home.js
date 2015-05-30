@@ -17,6 +17,7 @@ var Minis = React.createClass({
       // console.log('YES');
       activated.push(el.textContent);
       localStorage.setItem('activated-mini-apps', JSON.stringify(activated));
+      el.parentNode.classList.add('activated');
       // console.log(activated);
     // }
   },
@@ -34,13 +35,14 @@ var Minis = React.createClass({
         // console.log(duration);
         event.preventDefault();
         event.stopPropagation();
-        if (duration > 500) {
+        if (duration > 300) {
           // if (confirm(`Do you want to REMOVE ${el.textContent}?`)) {
             const activated = () => JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
             localStorage.setItem(
               'activated-mini-apps',
               JSON.stringify(_.without(activated(), el.textContent))
             );
+            el.parentNode.classList.remove('activated');
             // console.log(activated());
           // }
         } else if (duration > 0) {
@@ -64,14 +66,16 @@ var Minis = React.createClass({
                  onTouchEnd={this.touch}
                  onTouchCancel={this.touch}
                  onTouchMove={this.touch}>
-              <img src="http://placehold.it/300x300"/>
+              <div className="vert-helper"></div>
+              <img src={`build/img/icon-${i*2+1}.png`}/>
             </div>
             <div className="col"
                  onTouchStart={this.touch}
                  onTouchEnd={this.touch}
                  onTouchCancel={this.touch}
                  onTouchMove={this.touch}>
-              <img src="http://placehold.it/300x300"/>
+              <div className="vert-helper"></div>
+              <img src={`build/img/icon-${i*2+2}.png`}/>
             </div>
           </div>
         ))}
@@ -90,31 +94,26 @@ var App = React.createClass({
         name: 'CrimeMapper',
         logo: ''
       },{
-        name: 'example app',
+        name: 'example app 3',
         logo: ''
       },{
-        name: 'example app',
+        name: 'example app 4',
         logo: ''
       },{
-        name: 'example app',
+        name: 'example app 5',
         logo: ''
       },{
-        name: 'example app',
+        name: 'example app 6',
         logo: ''
       },{
-        name: 'example app',
+        name: 'example app 7',
         logo: ''
       },{
-        name: 'example app',
+        name: 'example app 8',
         logo: ''
       }
     ];
-    return (
-      <div>
-        <h1>HOMEPAGE</h1>
-        <Minis minis={minis}/>
-      </div>
-    );
+    return (<Minis minis={minis}/>);
   }
 });
 
