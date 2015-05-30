@@ -7,6 +7,10 @@ var browserSync = require('browser-sync');
 var runSequence = require('run-sequence');
 var karma = require('karma').server;
 
+var onError = function (err) {
+  console.log(err);
+};
+
 // DEVELOPMENT TASKS
 //================================================
 
@@ -37,9 +41,16 @@ gulp.task('browser-sync', function() {
 
 // JSX
 gulp.task('jsx', function() {
+  console.log("jsxing!!!!")
+
   return gulp.src('src/**/*.js')
-    .pipe(plugins.cached('jsx'))  //Process only changed files
-    .pipe(plugins.react())
+      .pipe(plugins.plumber({
+        errorHandler: onError
+      }))
+      .pipe(plugins.cached('jsx'))  //Process only changed files
+
+      .pipe(plugins.react())
+
     .pipe(gulp.dest('build/'));
 });
 
@@ -80,7 +91,9 @@ gulp.task('serve', ['browser-sync', 'jsx', 'sass'] , function(cb) {
     function() {
       gulp.start('jsx');
     }
-  );
+  ).pipe(plugins.plumber({
+        errorHandler: onError
+      }))
 });
 
 // Delete build Directory
@@ -132,9 +145,12 @@ gulp.task('html', function() {
 });
 
 // Bundle with jspm
+
+// Bundle with jspm
 gulp.task('bundle', ['jsx'], plugins.shell.task([
   'jspm bundle-sfx build/js/main dist/js/app.js'
 ]));
+
 
 // Uglify the bundle
 gulp.task('uglify', function() {
