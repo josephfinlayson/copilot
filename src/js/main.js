@@ -22,8 +22,15 @@ var App = React.createClass({
     render() {
         return (
             <div>
-                <h1>Co-pilot</h1>
-                <RouteHandler/>
+                <div className="bar-positive bar bar-header disable-user-behavior">
+                    <h1 className="title">Ionic Styled header bar</h1>
+</div>
+                    <div className="scroll-content ionic-scroll">
+                        <div className="scroll">
+                            <RouteHandler/>
+                        </div>
+                    </div>
+
             </div>
         )
     }
@@ -36,8 +43,9 @@ var routes = (
     <Route path="map" name="crimeMapper" handler={crimeMapper} />
     <Route name="crimeAlarm" handler={crimeAlarm} />
 </Route>
-
 );
+
+React.initializeTouchEvents(true)
 
 Router.run(routes, function (Handler) {
     React.render(<Handler />, document.querySelector('#app'));
