@@ -3,15 +3,36 @@
  */
 import React from 'react';
 
-var App = React.createClass({
-    render() {
-        return (
-            <div>
-                <h1>HOMEPAGE</h1>
+var Minis = React.createClass({
+  render() {
+    const minis = this.props.minis;
+    return (
+      <div>
+        {minis.map((mini, i) => (<div key={i} className="mini">{mini.name}</div>))}
+      </div>
+    );
+  }
+});
 
-            </div>
-        )
-    }
+var App = React.createClass({
+  render() {
+    const minis = [
+      {name: 'SOS'},
+      {name: 'CrimeMapper'},
+      {name: 'example app'},
+      {name: 'example app'},
+      {name: 'example app'},
+      {name: 'example app'},
+      {name: 'example app'},
+      {name: 'example app'}
+    ];
+    return (
+      <div>
+        <h1>HOMEPAGE</h1>
+        <Minis minis={minis}/>
+      </div>
+    );
+  }
 });
 
 export default App;
