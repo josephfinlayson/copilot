@@ -5,7 +5,6 @@ var plugins = require('gulp-load-plugins')();
 var rimraf = require('rimraf');
 var browserSync = require('browser-sync');
 var runSequence = require('run-sequence');
-var karma = require('karma').server;
 
 var onError = function (err) {
   console.log(err);
@@ -109,14 +108,6 @@ gulp.task('build', ['jsx', 'sass']);
 // Default
 gulp.task('default', ['serve']);
 
-// Tests
-gulp.task('test', function(done) {
-  karma.start({
-    configFile: __dirname + '/karma.conf.js'
-  }, done);
-});
-
-
 // DISTRIBUTION TASKS
 //===============================================
 
@@ -150,7 +141,6 @@ gulp.task('html', function() {
 gulp.task('bundle', ['jsx'], plugins.shell.task([
   'jspm bundle-sfx build/js/main dist/js/app.js'
 ]));
-
 
 // Uglify the bundle
 gulp.task('uglify', function() {
