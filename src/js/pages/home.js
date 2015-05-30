@@ -20,8 +20,36 @@ var Minis = React.createClass({
       console.log(activated);
     }
   },
-  doubleTap() {
-    console.log('double');
+  _touch: {
+    // started
+  },
+  touch(event) {
+    const now = Date.now(),
+          el = event.target;
+    switch (event.type) {
+      case 'touchstart':
+        console.log('start');
+        this._touch.started = Date.now();
+        break;
+      case 'touchend':
+        event.preventDefault();
+        event.stopPropagation();
+        if (this._touch.started && now - this._touch.started > 500) {
+          const activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
+          localStorage.setItem(
+            'activated-mini-apps',
+            JSON.stringify(_.without(activated, el.textContent))
+          );
+          console.log('hold');
+        }
+        delete this._touch.started;
+        break;
+      case 'touchcancel':
+        delete this._touch.started;
+        break;
+      default:
+        return false;
+    }
   },
   render() {
     const minis = this.props.minis;
@@ -29,8 +57,16 @@ var Minis = React.createClass({
       <div>
         {_.chunk(minis, 2).map((minis2, i) => (
           <div key={i} className="row">
-            <div className="col" onClick={this.tap} onDoubleClick={this.doubleTap}>{minis2[0].name}</div>
-            <div className="col" onClick={this.tap} onDoubleClick={this.doubleTap}>{minis2[1].name}</div>
+            <div className="col"
+                 onClick={this.tap}
+                 onTouchStart={this.touch}
+                 onTouchEnd={this.touch}
+                 onTouchCancel={this.touch}>{minis2[0].name}</div>
+            <div className="col"
+                 onClick={this.tap}
+                 onTouchStart={this.touch}
+                 onTouchEnd={this.touch}
+                 onTouchCancel={this.touch}>{minis2[1].name}</div>
           </div>
         ))}
       </div>
