@@ -29,6 +29,7 @@ var App = React.createClass({
     }
 });
 
+debugger;
 var routes = (
 <Route handler={App} path="/">
     <DefaultRoute handler={homePage} />
