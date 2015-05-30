@@ -10,6 +10,7 @@ System.config({
 
 System.config({
   "map": {
+    "fastclick": "npm:fastclick@1.0.6",
     "jquery": "github:components/jquery@2.1.4",
     "lodash": "npm:lodash@3.9.3",
     "react": "npm:react@0.13.3",

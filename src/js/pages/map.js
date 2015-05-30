@@ -3,6 +3,7 @@
  */
 import React from 'react';
 import $ from 'jquery';
+import _ from 'lodash';
 
 var App = React.createClass({
 
@@ -10,10 +11,15 @@ var App = React.createClass({
 		return {
 			lat: null,
 			lng: null,
+			deviceLat: null,
+			deviceLng: null,
 			map: null,
-			mapZoom: 17,
-			crimeApiURL: 'http://data.police.uk/api/crimes-street/all-crime',
-			crimeData: null
+			mapZoom: 15,
+			heatmapRadius: 15,
+			crimeApiURLRoot: 'http://data.police.uk/api/crimes-street/all-crime',
+			crimeData: null,
+			mapDragListener: false,
+			mapZoomListener: false
 		}
 	},
 
@@ -24,24 +30,26 @@ var App = React.createClass({
 				self.setState({
 					lng: position.coords.longitude,
 					lat: position.coords.latitude,
-					crimeApiURL: self.state.crimeApiURL + '?lat=' + position.coords.latitude + '&lng=' + position.coords.longitude
+					deviceLng: position.coords.longitude,
+					deviceLat: position.coords.latitude
 				});
-				// self.initializeGoogleMap();
 				self.getCrimeMap();
 			});
 		} else {
-			console.log("Geolocation is not supported by this browser.");
+			alter("Sorry, Geolocation is not supported by this browser.");
 		}
 	},
 
 	getCrimeMap() {
 		var self = this;
-		console.log(this.state.crimeApiURL);
+		console.log(this.state.crimeApiURLRoot);
 		var heatmapGradient = [
 			'rgba(248,177,177,0)',
-			'rgba(236,81,81,1)',
-			'rgba(236,81,81,1)',
-			'rgba(234,65,65,1)',
+			'rgba(248,177,177,0)',
+			// 'rgba(236,81,81,1)',
+			// 'rgba(234,65,65,1)',
+			'rgba(248,177,177,0)',
+			'rgba(248,177,177,0)',
 			'rgba(234,65,65,1)',
 			'rgba(229,48,48,1)',
 			'rgba(229,48,48,1)',
@@ -54,105 +62,117 @@ var App = React.createClass({
 			'rgba(194,1,1,1)',
 			'rgba(194,1,1,1)'
 		];
-		$.get(this.state.crimeApiURL, function(result) {
+		console.log('calling api...');
+		var ApiURL = self.state.crimeApiURLRoot + '?lat=' + self.state.lat + '&lng=' + self.state.lng;
+		console.log(ApiURL);
+		$.get(ApiURL, function(result) {
+			console.log('done calling api');
 			if (this.isMounted()) {
-				var mapProp = {
-					center:new google.maps.LatLng(this.state.lat,this.state.lng),
-					zoom: this.state.mapZoom,
-					mapTypeId:google.maps.MapTypeId.ROADMAP
-				};
-				var map=new google.maps.Map(document.getElementById("googleMap"),mapProp);
+				var map;
+				if (!self.state.map) {
+					var mapProp = {
+						center:new google.maps.LatLng(this.state.lat,this.state.lng),
+						zoom: this.state.mapZoom,
+						mapTypeId:google.maps.MapTypeId.ROADMAP
+					};
+					map=new google.maps.Map(document.getElementById("googleMap"),mapProp);
+					self.setState({
+						map: map
+					});
 
-				var loadingWindow = new google.maps.InfoWindow({
-					content:"Hello World!"
-				});
-				loadingWindow.open(map);
+					var devicePosition = new google.maps.LatLng(self.state.deviceLat, self.state.deviceLng);
+					var marker=new google.maps.Marker({
+						position: devicePosition,
+					});
+					marker.setMap(map);
+
+				}
+				else {
+					map = self.state.map;
+				}
 
 				var list = [];
-				// var iconImg = {
-				// 	url: 'build/img/red-dot-xs.png',
-				// 	size: new google.maps.Size(20, 20),
-				// 	origin: new google.maps.Point(0,0),
-				// 	anchor: new google.maps.Point(0, 32)
-				// };
+
 				result.forEach(function(item) {
 					var lat = item.location.latitude;
 					var lng = item.location.longitude;
-					// var marker = new google.maps.Marker({
-					// 	position: new google.maps.LatLng(lat, lng),
-					// 	map: map,
-					// 	icon: 'build/img/red-dot-xs.png'
-					// 	// icon: iconImg,
-					// 	// zIndex: 1000
-					// });
-					// console.log(lat, lng);
 					list.push(new google.maps.LatLng(lat, lng));
 				});
 				var pointArray = new google.maps.MVCArray(list);
-				// console.log(pointArray);
 				var center = new google.maps.LatLng(self.state.lat,self.state.lng);
+				if (self.state.heatmap) {
+					console.log('removing old heatmap.');
+					self.state.heatmap.setMap(null);
+				}
 				var heatmap = new google.maps.visualization.HeatmapLayer({
 					center: center,
 					data: pointArray,
-					radius: 15
+					radius: self.state.heatmapRadius
 				});
+				console.log('drawing new heatmap: ');
 				self.setState({heatmap: heatmap});
 				heatmap.setMap(map);
 				heatmap.set('gradient', heatmapGradient);
-				loadingWindow.close();
 
-				google.maps.event.addListener(map, 'dragend', function() {
-					// console.log('Center Changed');
-					var c = map.getCenter();
-					var newLat = c.lat();
-					var newLng = c.lng();
-					// console.log(newLat, newLng);
-					var dist = self.getDistanceFromLatLonInKm(self.state.lat, self.state.lng, newLat, newLng);
-					console.log(dist);
-					if (dist > 0.5) {
-						self.setState({
-							lng: newLng,
-							lat: newLat,
-							crimeApiURL: self.state.crimeApiURL + '?lat=' + newLat + '&lng=' + newLng
-						});
-						heatmap.setMap(null);
-						self.getCrimeMap();
-					}
-				});
+				var debouncedCrimeMap = _.debounce(self.getCrimeMap, 500);
 
-				google.maps.event.addListener(map, 'zoom_changed', function() {
-					var newZoom = map.getZoom();
+				if (!self.state.mapDragListener) {
 					self.setState({
-						mapZoom: newZoom
+						mapDragListener:true
 					});
-					if (newZoom > 20) {
-						heatmap.set('radius', 20);
-					}
-					else if (newZoom < 15 ) {
-						heatmap.set('radius', 15);
-					}
-					else if (newZoom < 10) {
-						heatmap.set('radius', 10);
-					}
-					else {
-						heatmap.set('radius', 10);
-					}
-					// console.log('Zoom Changed:', newZoom);
-				});
+					google.maps.event.addListener(self.state.map, 'dragend', function() {
+						// console.log('Center Changed');
+						var map = self.state.map;
+						var c = map.getCenter();
+						var newLat = c.lat();
+						var newLng = c.lng();
+						// console.log(newLat, newLng);
+						var dist = self.getDistanceFromLatLonInKm(self.state.lat, self.state.lng, newLat, newLng);
+						// console.log(dist);
+						if (dist > 0.5) {
 
-				// for (var i=0; i<500; i++) {
-				// 	if (result[i]) {
-				// 		var pos = result[i]['location'];
-				// 		var category = result[i]['category'];
-				// 		console.log(pos);
-				// 		console.log(category);
-				// 		var point = new google.maps.LatLng(pos.latitude,pos.longitude);
-				// 		var marker = new google.maps.Marker({
-				// 			position:point,
-				// 			map: map
-				// 		});
-				// 	}
-				// }
+							// var currentPosition = new google.maps.LatLng(newLat, newLng);
+							// var marker=new google.maps.Marker({
+							// 	position: currentPosition,
+							// });
+							// marker.setMap(map);
+
+							self.setState({
+								lng: newLng,
+								lat: newLat
+							});
+							debouncedCrimeMap();
+						}
+					});
+				}
+
+				if (!self.state.mapZoomListener) {
+					self.setState({
+						mapZoomListener:true
+					});
+					google.maps.event.addListener(self.state.map, 'zoom_changed', function() {
+						var map = self.state.map;
+						var newZoom = map.getZoom();
+						console.log('zoom: ', newZoom);
+						self.setState({
+							mapZoom: newZoom
+						});
+						heatmap.set('radius', parseInt(newZoom * 1));
+						// if (newZoom > 20) {
+						// 	heatmap.set('radius', 20);
+						// }
+						// else if (newZoom <= 15 ) {
+						// 	heatmap.set('radius', 15);
+						// }
+						// else if (newZoom <= 10) {
+						// 	heatmap.set('radius', 10);
+						// }
+						// else {
+						// 	heatmap.set('radius', 5);
+						// }
+						// console.log('Zoom Changed:', newZoom);
+					});
+				}
 			}
 		}.bind(this));
 	},
@@ -161,7 +181,7 @@ var App = React.createClass({
 			return (
 					<div>
 							<h1>map</h1>
-							<div id="googleMap"><div className="loading-txt">Loading...</div></div>
+							<div id="googleMap"><div className="loading-txt">Loading...<br /><i className="icon ion-loading-d"></i></div></div>
 					</div>
 			)
 	},
