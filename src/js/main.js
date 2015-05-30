@@ -45,6 +45,8 @@ var routes = (
 </Route>
 );
 
+React.initializeTouchEvents(true)
+
 Router.run(routes, function (Handler) {
     React.render(<Handler />, document.querySelector('#app'));
 });
