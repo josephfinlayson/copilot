@@ -4,14 +4,24 @@
 
 import React from 'react';
 import _ from 'lodash';
+// import injectTapEventPlugin from 'react-tap-event-plugin';
+
+// injectTapEventPlugin();
 
 var Minis = React.createClass({
   tap(event) {
-    const el = event.target;
+    const el = event.target,
+          activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
     console.log(`tapped ${el.textContent}`);
     if (confirm(`Do you want to activate ${el.textContent}?`)) {
       console.log('YES');
+      activated.push(el.textContent);
+      localStorage.setItem('activated-mini-apps', JSON.stringify(activated));
+      console.log(activated);
     }
+  },
+  doubleTap() {
+    console.log('double');
   },
   render() {
     const minis = this.props.minis;
@@ -19,8 +29,8 @@ var Minis = React.createClass({
       <div>
         {_.chunk(minis, 2).map((minis2, i) => (
           <div key={i} className="row">
-            <div className="col" onClick={this.tap}>{minis2[0].name}</div>
-            <div className="col" onClick={this.tap}>{minis2[1].name}</div>
+            <div className="col" onClick={this.tap} onDoubleClick={this.doubleTap}>{minis2[0].name}</div>
+            <div className="col" onClick={this.tap} onDoubleClick={this.doubleTap}>{minis2[1].name}</div>
           </div>
         ))}
       </div>

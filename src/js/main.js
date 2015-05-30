@@ -2,7 +2,7 @@
 'use strict';
 
 import React from 'react';
-import injectTapEventPlugin from 'react-tap-event-plugin';
+// import injectTapEventPlugin from 'react-tap-event-plugin';
 
 //pages
 import homePage from './pages/home';
@@ -13,7 +13,7 @@ import crimeAlarm from './pages/alarm';
 //router
 import Router from 'react-router';
 
-injectTapEventPlugin();
+// injectTapEventPlugin();
 
 var Route = Router.Route,
     DefaultRoute = Router.DefaultRoute,
