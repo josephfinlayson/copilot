@@ -2,6 +2,7 @@
 'use strict';
 
 import React from 'react';
+import injectTapEventPlugin from 'react-tap-event-plugin';
 
 //pages
 import homePage from './pages/home';
@@ -12,11 +13,13 @@ import crimeAlarm from './pages/alarm';
 //router
 import Router from 'react-router';
 
+injectTapEventPlugin();
+
 var Route = Router.Route,
     DefaultRoute = Router.DefaultRoute,
     NotFoundRoute = Router.NotFoundRoute,
     Redirect = Router.Redirect,
-    RouteHandler = Router.RouteHandler
+    RouteHandler = Router.RouteHandler;
 
 var App = React.createClass({
     render() {

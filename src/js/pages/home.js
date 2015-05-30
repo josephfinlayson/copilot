@@ -6,14 +6,21 @@ import React from 'react';
 import _ from 'lodash';
 
 var Minis = React.createClass({
+  tap(event) {
+    const el = event.target;
+    console.log(`tapped ${el.textContent}`);
+    if (confirm(`Do you want to activate ${el.textContent}?`)) {
+      console.log('YES');
+    }
+  },
   render() {
     const minis = this.props.minis;
     return (
       <div>
         {_.chunk(minis, 2).map((minis2, i) => (
           <div key={i} className="row">
-            <div className="col">{minis2[0].name}</div>
-            <div className="col">{minis2[1].name}</div>
+            <div className="col" onClick={this.tap}>{minis2[0].name}</div>
+            <div className="col" onClick={this.tap}>{minis2[1].name}</div>
           </div>
         ))}
       </div>
