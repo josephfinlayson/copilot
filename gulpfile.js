@@ -140,17 +140,12 @@ gulp.task('cordova', ['bundle', 'sass'], function(){
   gulp.src('./index.html')
       .pipe(gulp.dest('cordova/www'))
 
-<<<<<<< HEAD
   gulp.src('src/img/**')
       .pipe(gulp.dest('cordova/www/build/img'))
 
 
   gulp.src('build/css/**')
       .pipe(gulp.dest('cordova/www/build/css'))
-=======
-  gulp.src('build/css/**')
-      .pipe(gulp.dest('cordova/www/build/css/'))
->>>>>>> ca33cde614794a47ad955193c58f4b0ba590572c
 
 
   //gulp.src('node_modules/**')
