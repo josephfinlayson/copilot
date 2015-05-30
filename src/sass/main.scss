@@ -4,7 +4,9 @@
 @import "home";
 
 #googleMap {
-	width: 500px;
-	height: 380px;
+	width: 700px;
+	height: 500px;
+	max-width: 100%;
 	background-color: #EDEDED;
+	margin: 20px auto;
 }
