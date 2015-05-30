@@ -4,13 +4,17 @@
   <meta charset="UTF-8">
   <title>COPILOT</title>
   <link rel="stylesheet" href="build/css/main.css"/>
-
-  <script src="http://maps.googleapis.com/maps/api/js"></script>
+  <script src="http://maps.googleapis.com/maps/api/js?libraries=visualization"></script>
 </head>
 <body class = "grade-a platform-browser platform-linux platform-ready">
   <div id="app">
 
-  </div>
+
+    <script src="http://maps.googleapis.com/maps/api/js"></script>
+</head>
+<body class="grade-a platform-browser platform-linux platform-ready">
+<div id="app">
+</div>
 </body>
 
 
@@ -21,13 +25,9 @@
 
 <script src="jspm_packages/system.js"></script>
 <script src="config.js"></script>
-<script>
-
-if (!cordova) {
-  System.import('build/js/main');
-}
-
-</script>
+<script>if (typeof cordova === 'undefined') {
+    System.import('build/js/main');
+}</script>
 
 
 </html>
