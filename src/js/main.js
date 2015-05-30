@@ -2,6 +2,8 @@
 'use strict';
 
 import React from 'react';
+import _ from 'lodash';
+import attachFastClick from 'fastclick';
 // import injectTapEventPlugin from 'react-tap-event-plugin';
 
 //pages
@@ -10,6 +12,7 @@ import settingsPage from './pages/settings';
 import crimeMapper from './pages/map';
 import crimeAlarm from './pages/alarm';
 import health from './pages/health';
+import SOS from './pages/alarm';
 
 //router
 import Router from 'react-router';
@@ -18,6 +21,7 @@ import Modal from 'react-modal';
 Modal.setAppElement(document.querySelector('#app'));
 
 // injectTapEventPlugin();
+attachFastClick();
 
 var Route = Router.Route,
     DefaultRoute = Router.DefaultRoute,
@@ -27,27 +31,25 @@ var Route = Router.Route,
     Link = Router.Link;
 
 var App = React.createClass({
+    mixins: [Router.Navigation],
     render() {
-        return (
-            <div>
-                <div className="bar-positive bar bar-header disable-user-behavior">
-                    <div className="buttons">
-                        <Link to="settings">
+      return (
+        <div>
+          <div className="bar-dark bar bar-header disable-user-behavior">
+            <button className="button button-clear" onClick={this.goBack}>〈 Back</button>
 
-                        <button className="button">Settings Icon</button>
-                            </Link>
-                    </div>
-                    <h1 className="title">Ionic Styled header bar</h1>
+            <h1 className="title">CoPilot</h1>
 
-                    </div>
-                    <div className="scroll-content ionic-scroll has-header">
-                        <div className="scroll">
-                            <RouteHandler/>
-                        </div>
-                    </div>
-
+            <button className="button button-clear"
+                    onClick={_.partial(this.transitionTo, 'settings')}>SOS</button>
+          </div>
+          <div className="scroll-content ionic-scroll">
+            <div className="scroll">
+              <RouteHandler/>
             </div>
-        )
+          </div>
+        </div>
+      )
     }
 });
 
@@ -58,7 +60,7 @@ var routes = (
     <Route path="map" name="crimeMapper" handler={crimeMapper} />
     <Route name="crimeAlarm" handler={crimeAlarm} />
     <Route name="health" path="health" handler={health} />
-
+    <Route name="SOS" handler={SOS} />
     <Route name="settings"
         handler={settingsPage}
         path="/settings" />
