@@ -24765,7 +24765,9 @@ System.register("build/js/pages/health", ["build/js/components/assistanceButton"
             textAlign: 'center',
             paddingTop: '40px',
             margin: '10px',
-            marginLeft: '12%'
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            padding: '10px'
           };
           var buttonStyle = {
             display: 'block',
@@ -24783,7 +24785,7 @@ System.register("build/js/pages/health", ["build/js/components/assistanceButton"
             buttonClasses: "button button-block health-button button-energized",
             buttonText: "Get insurance internationally!",
             assistanceType: "healthInsuranceGlobal"
-          }), React.createElement(AssistanceButton, {buttonClasses: ""})));
+          })));
         }}));
     }
   };
@@ -24887,7 +24889,7 @@ System.register("build/js/pages/home", ["npm:react@0.13.3", "npm:lodash@3.9.3", 
             name: 'Guardian',
             description: "Call a guardian if you're feeling unsafe",
             logo: 'icon-2',
-            route: 'SOS'
+            route: 'guardian'
           }, {
             name: 'Health Emergency',
             description: 'Get assistance fast',
