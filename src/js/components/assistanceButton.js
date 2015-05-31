@@ -48,7 +48,6 @@ export default React.createClass({
                 break;
 
             case 'crime':
-
                 var obj = {
                     "code": "50004",
                     "name": "Robbery",
@@ -56,9 +55,20 @@ export default React.createClass({
                     "price": 19
                 }
 
+
                 return obj;
                 break;
-
+            case 'crimeMap':
+            var obj =   {
+                    "code": "1007",
+                    "category": "TRAVEL",
+                    "type": "SUBSCRIPTION",
+                    "name": "Single Trip EU Travel Insurance",
+                    "description": "1 day travel insurance for one person, including cancellation, medical advice, medical costs, repatriation, personal accident cover. Remark: Add number of days and travelers as multiplicator.",
+                    "price": 1.99
+                }
+                return obj;
+                break;
             default:
                 console.log(this.state);
                 break;
