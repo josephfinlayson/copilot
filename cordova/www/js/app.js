@@ -8145,6 +8145,429 @@ System.register("npm:lodash@3.9.3/index", ["github:jspm/nodelibs-process@0.1.1"]
   return module.exports;
 });
 
+System.register("npm:fastclick@1.0.6/lib/fastclick", [], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  "format cjs";
+  ;
+  (function() {
+    'use strict';
+    function FastClick(layer, options) {
+      var oldOnClick;
+      options = options || {};
+      this.trackingClick = false;
+      this.trackingClickStart = 0;
+      this.targetElement = null;
+      this.touchStartX = 0;
+      this.touchStartY = 0;
+      this.lastTouchIdentifier = 0;
+      this.touchBoundary = options.touchBoundary || 10;
+      this.layer = layer;
+      this.tapDelay = options.tapDelay || 200;
+      this.tapTimeout = options.tapTimeout || 700;
+      if (FastClick.notNeeded(layer)) {
+        return ;
+      }
+      function bind(method, context) {
+        return function() {
+          return method.apply(context, arguments);
+        };
+      }
+      var methods = ['onMouse', 'onClick', 'onTouchStart', 'onTouchMove', 'onTouchEnd', 'onTouchCancel'];
+      var context = this;
+      for (var i = 0,
+          l = methods.length; i < l; i++) {
+        context[methods[i]] = bind(context[methods[i]], context);
+      }
+      if (deviceIsAndroid) {
+        layer.addEventListener('mouseover', this.onMouse, true);
+        layer.addEventListener('mousedown', this.onMouse, true);
+        layer.addEventListener('mouseup', this.onMouse, true);
+      }
+      layer.addEventListener('click', this.onClick, true);
+      layer.addEventListener('touchstart', this.onTouchStart, false);
+      layer.addEventListener('touchmove', this.onTouchMove, false);
+      layer.addEventListener('touchend', this.onTouchEnd, false);
+      layer.addEventListener('touchcancel', this.onTouchCancel, false);
+      if (!Event.prototype.stopImmediatePropagation) {
+        layer.removeEventListener = function(type, callback, capture) {
+          var rmv = Node.prototype.removeEventListener;
+          if (type === 'click') {
+            rmv.call(layer, type, callback.hijacked || callback, capture);
+          } else {
+            rmv.call(layer, type, callback, capture);
+          }
+        };
+        layer.addEventListener = function(type, callback, capture) {
+          var adv = Node.prototype.addEventListener;
+          if (type === 'click') {
+            adv.call(layer, type, callback.hijacked || (callback.hijacked = function(event) {
+              if (!event.propagationStopped) {
+                callback(event);
+              }
+            }), capture);
+          } else {
+            adv.call(layer, type, callback, capture);
+          }
+        };
+      }
+      if (typeof layer.onclick === 'function') {
+        oldOnClick = layer.onclick;
+        layer.addEventListener('click', function(event) {
+          oldOnClick(event);
+        }, false);
+        layer.onclick = null;
+      }
+    }
+    var deviceIsWindowsPhone = navigator.userAgent.indexOf("Windows Phone") >= 0;
+    var deviceIsAndroid = navigator.userAgent.indexOf('Android') > 0 && !deviceIsWindowsPhone;
+    var deviceIsIOS = /iP(ad|hone|od)/.test(navigator.userAgent) && !deviceIsWindowsPhone;
+    var deviceIsIOS4 = deviceIsIOS && (/OS 4_\d(_\d)?/).test(navigator.userAgent);
+    var deviceIsIOSWithBadTarget = deviceIsIOS && (/OS [6-7]_\d/).test(navigator.userAgent);
+    var deviceIsBlackBerry10 = navigator.userAgent.indexOf('BB10') > 0;
+    FastClick.prototype.needsClick = function(target) {
+      switch (target.nodeName.toLowerCase()) {
+        case 'button':
+        case 'select':
+        case 'textarea':
+          if (target.disabled) {
+            return true;
+          }
+          break;
+        case 'input':
+          if ((deviceIsIOS && target.type === 'file') || target.disabled) {
+            return true;
+          }
+          break;
+        case 'label':
+        case 'iframe':
+        case 'video':
+          return true;
+      }
+      return (/\bneedsclick\b/).test(target.className);
+    };
+    FastClick.prototype.needsFocus = function(target) {
+      switch (target.nodeName.toLowerCase()) {
+        case 'textarea':
+          return true;
+        case 'select':
+          return !deviceIsAndroid;
+        case 'input':
+          switch (target.type) {
+            case 'button':
+            case 'checkbox':
+            case 'file':
+            case 'image':
+            case 'radio':
+            case 'submit':
+              return false;
+          }
+          return !target.disabled && !target.readOnly;
+        default:
+          return (/\bneedsfocus\b/).test(target.className);
+      }
+    };
+    FastClick.prototype.sendClick = function(targetElement, event) {
+      var clickEvent,
+          touch;
+      if (document.activeElement && document.activeElement !== targetElement) {
+        document.activeElement.blur();
+      }
+      touch = event.changedTouches[0];
+      clickEvent = document.createEvent('MouseEvents');
+      clickEvent.initMouseEvent(this.determineEventType(targetElement), true, true, window, 1, touch.screenX, touch.screenY, touch.clientX, touch.clientY, false, false, false, false, 0, null);
+      clickEvent.forwardedTouchEvent = true;
+      targetElement.dispatchEvent(clickEvent);
+    };
+    FastClick.prototype.determineEventType = function(targetElement) {
+      if (deviceIsAndroid && targetElement.tagName.toLowerCase() === 'select') {
+        return 'mousedown';
+      }
+      return 'click';
+    };
+    FastClick.prototype.focus = function(targetElement) {
+      var length;
+      if (deviceIsIOS && targetElement.setSelectionRange && targetElement.type.indexOf('date') !== 0 && targetElement.type !== 'time' && targetElement.type !== 'month') {
+        length = targetElement.value.length;
+        targetElement.setSelectionRange(length, length);
+      } else {
+        targetElement.focus();
+      }
+    };
+    FastClick.prototype.updateScrollParent = function(targetElement) {
+      var scrollParent,
+          parentElement;
+      scrollParent = targetElement.fastClickScrollParent;
+      if (!scrollParent || !scrollParent.contains(targetElement)) {
+        parentElement = targetElement;
+        do {
+          if (parentElement.scrollHeight > parentElement.offsetHeight) {
+            scrollParent = parentElement;
+            targetElement.fastClickScrollParent = parentElement;
+            break;
+          }
+          parentElement = parentElement.parentElement;
+        } while (parentElement);
+      }
+      if (scrollParent) {
+        scrollParent.fastClickLastScrollTop = scrollParent.scrollTop;
+      }
+    };
+    FastClick.prototype.getTargetElementFromEventTarget = function(eventTarget) {
+      if (eventTarget.nodeType === Node.TEXT_NODE) {
+        return eventTarget.parentNode;
+      }
+      return eventTarget;
+    };
+    FastClick.prototype.onTouchStart = function(event) {
+      var targetElement,
+          touch,
+          selection;
+      if (event.targetTouches.length > 1) {
+        return true;
+      }
+      targetElement = this.getTargetElementFromEventTarget(event.target);
+      touch = event.targetTouches[0];
+      if (deviceIsIOS) {
+        selection = window.getSelection();
+        if (selection.rangeCount && !selection.isCollapsed) {
+          return true;
+        }
+        if (!deviceIsIOS4) {
+          if (touch.identifier && touch.identifier === this.lastTouchIdentifier) {
+            event.preventDefault();
+            return false;
+          }
+          this.lastTouchIdentifier = touch.identifier;
+          this.updateScrollParent(targetElement);
+        }
+      }
+      this.trackingClick = true;
+      this.trackingClickStart = event.timeStamp;
+      this.targetElement = targetElement;
+      this.touchStartX = touch.pageX;
+      this.touchStartY = touch.pageY;
+      if ((event.timeStamp - this.lastClickTime) < this.tapDelay) {
+        event.preventDefault();
+      }
+      return true;
+    };
+    FastClick.prototype.touchHasMoved = function(event) {
+      var touch = event.changedTouches[0],
+          boundary = this.touchBoundary;
+      if (Math.abs(touch.pageX - this.touchStartX) > boundary || Math.abs(touch.pageY - this.touchStartY) > boundary) {
+        return true;
+      }
+      return false;
+    };
+    FastClick.prototype.onTouchMove = function(event) {
+      if (!this.trackingClick) {
+        return true;
+      }
+      if (this.targetElement !== this.getTargetElementFromEventTarget(event.target) || this.touchHasMoved(event)) {
+        this.trackingClick = false;
+        this.targetElement = null;
+      }
+      return true;
+    };
+    FastClick.prototype.findControl = function(labelElement) {
+      if (labelElement.control !== undefined) {
+        return labelElement.control;
+      }
+      if (labelElement.htmlFor) {
+        return document.getElementById(labelElement.htmlFor);
+      }
+      return labelElement.querySelector('button, input:not([type=hidden]), keygen, meter, output, progress, select, textarea');
+    };
+    FastClick.prototype.onTouchEnd = function(event) {
+      var forElement,
+          trackingClickStart,
+          targetTagName,
+          scrollParent,
+          touch,
+          targetElement = this.targetElement;
+      if (!this.trackingClick) {
+        return true;
+      }
+      if ((event.timeStamp - this.lastClickTime) < this.tapDelay) {
+        this.cancelNextClick = true;
+        return true;
+      }
+      if ((event.timeStamp - this.trackingClickStart) > this.tapTimeout) {
+        return true;
+      }
+      this.cancelNextClick = false;
+      this.lastClickTime = event.timeStamp;
+      trackingClickStart = this.trackingClickStart;
+      this.trackingClick = false;
+      this.trackingClickStart = 0;
+      if (deviceIsIOSWithBadTarget) {
+        touch = event.changedTouches[0];
+        targetElement = document.elementFromPoint(touch.pageX - window.pageXOffset, touch.pageY - window.pageYOffset) || targetElement;
+        targetElement.fastClickScrollParent = this.targetElement.fastClickScrollParent;
+      }
+      targetTagName = targetElement.tagName.toLowerCase();
+      if (targetTagName === 'label') {
+        forElement = this.findControl(targetElement);
+        if (forElement) {
+          this.focus(targetElement);
+          if (deviceIsAndroid) {
+            return false;
+          }
+          targetElement = forElement;
+        }
+      } else if (this.needsFocus(targetElement)) {
+        if ((event.timeStamp - trackingClickStart) > 100 || (deviceIsIOS && window.top !== window && targetTagName === 'input')) {
+          this.targetElement = null;
+          return false;
+        }
+        this.focus(targetElement);
+        this.sendClick(targetElement, event);
+        if (!deviceIsIOS || targetTagName !== 'select') {
+          this.targetElement = null;
+          event.preventDefault();
+        }
+        return false;
+      }
+      if (deviceIsIOS && !deviceIsIOS4) {
+        scrollParent = targetElement.fastClickScrollParent;
+        if (scrollParent && scrollParent.fastClickLastScrollTop !== scrollParent.scrollTop) {
+          return true;
+        }
+      }
+      if (!this.needsClick(targetElement)) {
+        event.preventDefault();
+        this.sendClick(targetElement, event);
+      }
+      return false;
+    };
+    FastClick.prototype.onTouchCancel = function() {
+      this.trackingClick = false;
+      this.targetElement = null;
+    };
+    FastClick.prototype.onMouse = function(event) {
+      if (!this.targetElement) {
+        return true;
+      }
+      if (event.forwardedTouchEvent) {
+        return true;
+      }
+      if (!event.cancelable) {
+        return true;
+      }
+      if (!this.needsClick(this.targetElement) || this.cancelNextClick) {
+        if (event.stopImmediatePropagation) {
+          event.stopImmediatePropagation();
+        } else {
+          event.propagationStopped = true;
+        }
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
+      }
+      return true;
+    };
+    FastClick.prototype.onClick = function(event) {
+      var permitted;
+      if (this.trackingClick) {
+        this.targetElement = null;
+        this.trackingClick = false;
+        return true;
+      }
+      if (event.target.type === 'submit' && event.detail === 0) {
+        return true;
+      }
+      permitted = this.onMouse(event);
+      if (!permitted) {
+        this.targetElement = null;
+      }
+      return permitted;
+    };
+    FastClick.prototype.destroy = function() {
+      var layer = this.layer;
+      if (deviceIsAndroid) {
+        layer.removeEventListener('mouseover', this.onMouse, true);
+        layer.removeEventListener('mousedown', this.onMouse, true);
+        layer.removeEventListener('mouseup', this.onMouse, true);
+      }
+      layer.removeEventListener('click', this.onClick, true);
+      layer.removeEventListener('touchstart', this.onTouchStart, false);
+      layer.removeEventListener('touchmove', this.onTouchMove, false);
+      layer.removeEventListener('touchend', this.onTouchEnd, false);
+      layer.removeEventListener('touchcancel', this.onTouchCancel, false);
+    };
+    FastClick.notNeeded = function(layer) {
+      var metaViewport;
+      var chromeVersion;
+      var blackberryVersion;
+      var firefoxVersion;
+      if (typeof window.ontouchstart === 'undefined') {
+        return true;
+      }
+      chromeVersion = +(/Chrome\/([0-9]+)/.exec(navigator.userAgent) || [, 0])[1];
+      if (chromeVersion) {
+        if (deviceIsAndroid) {
+          metaViewport = document.querySelector('meta[name=viewport]');
+          if (metaViewport) {
+            if (metaViewport.content.indexOf('user-scalable=no') !== -1) {
+              return true;
+            }
+            if (chromeVersion > 31 && document.documentElement.scrollWidth <= window.outerWidth) {
+              return true;
+            }
+          }
+        } else {
+          return true;
+        }
+      }
+      if (deviceIsBlackBerry10) {
+        blackberryVersion = navigator.userAgent.match(/Version\/([0-9]*)\.([0-9]*)/);
+        if (blackberryVersion[1] >= 10 && blackberryVersion[2] >= 3) {
+          metaViewport = document.querySelector('meta[name=viewport]');
+          if (metaViewport) {
+            if (metaViewport.content.indexOf('user-scalable=no') !== -1) {
+              return true;
+            }
+            if (document.documentElement.scrollWidth <= window.outerWidth) {
+              return true;
+            }
+          }
+        }
+      }
+      if (layer.style.msTouchAction === 'none' || layer.style.touchAction === 'manipulation') {
+        return true;
+      }
+      firefoxVersion = +(/Firefox\/([0-9]+)/.exec(navigator.userAgent) || [, 0])[1];
+      if (firefoxVersion >= 27) {
+        metaViewport = document.querySelector('meta[name=viewport]');
+        if (metaViewport && (metaViewport.content.indexOf('user-scalable=no') !== -1 || document.documentElement.scrollWidth <= window.outerWidth)) {
+          return true;
+        }
+      }
+      if (layer.style.touchAction === 'none' || layer.style.touchAction === 'manipulation') {
+        return true;
+      }
+      return false;
+    };
+    FastClick.attach = function(layer, options) {
+      return new FastClick(layer, options);
+    };
+    if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
+      define(function() {
+        return FastClick;
+      });
+    } else if (typeof module !== 'undefined' && module.exports) {
+      module.exports = FastClick.attach;
+      module.exports.FastClick = FastClick;
+    } else {
+      window.FastClick = FastClick;
+    }
+  }());
+  global.define = __define;
+  return module.exports;
+});
+
 System.register("npm:object-assign@2.0.0/index", [], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -15313,6 +15736,162 @@ function define(){};  define.amd = {};
   return jQuery;
 }));
 })();
+System.register("npm:react-modal@0.2.0/lib/helpers/tabbable", [], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  function focusable(element, isTabIndexNotNaN) {
+    var nodeName = element.nodeName.toLowerCase();
+    return (/input|select|textarea|button|object/.test(nodeName) ? !element.disabled : "a" === nodeName ? element.href || isTabIndexNotNaN : isTabIndexNotNaN) && visible(element);
+  }
+  function hidden(el) {
+    return (el.offsetWidth <= 0 && el.offsetHeight <= 0) || el.style.display === 'none';
+  }
+  function visible(element) {
+    while (element) {
+      if (element === document.body)
+        break;
+      if (hidden(element))
+        return false;
+      element = element.parentNode;
+    }
+    return true;
+  }
+  function tabbable(element) {
+    var tabIndex = element.getAttribute('tabindex');
+    if (tabIndex === null)
+      tabIndex = undefined;
+    var isTabIndexNaN = isNaN(tabIndex);
+    return (isTabIndexNaN || tabIndex >= 0) && focusable(element, !isTabIndexNaN);
+  }
+  function findTabbableDescendants(element) {
+    return [].slice.call(element.querySelectorAll('*'), 0).filter(function(el) {
+      return tabbable(el);
+    });
+  }
+  module.exports = findTabbableDescendants;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-modal@0.2.0/lib/helpers/scopeTab", ["npm:react-modal@0.2.0/lib/helpers/tabbable"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var findTabbable = require("npm:react-modal@0.2.0/lib/helpers/tabbable");
+  module.exports = function(node, event) {
+    var tabbable = findTabbable(node);
+    var finalTabbable = tabbable[event.shiftKey ? 0 : tabbable.length - 1];
+    var leavingFinalTabbable = (finalTabbable === document.activeElement || node === document.activeElement);
+    if (!leavingFinalTabbable)
+      return ;
+    event.preventDefault();
+    var target = tabbable[event.shiftKey ? tabbable.length - 1 : 0];
+    target.focus();
+  };
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:classnames@1.2.2/index", [], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  "format cjs";
+  function classNames() {
+    var classes = '';
+    var arg;
+    for (var i = 0; i < arguments.length; i++) {
+      arg = arguments[i];
+      if (!arg) {
+        continue;
+      }
+      if ('string' === typeof arg || 'number' === typeof arg) {
+        classes += ' ' + arg;
+      } else if (Object.prototype.toString.call(arg) === '[object Array]') {
+        classes += ' ' + classNames.apply(null, arg);
+      } else if ('object' === typeof arg) {
+        for (var key in arg) {
+          if (!arg.hasOwnProperty(key) || !arg[key]) {
+            continue;
+          }
+          classes += ' ' + key;
+        }
+      }
+    }
+    return classes.substr(1);
+  }
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = classNames;
+  }
+  if (typeof define !== 'undefined' && define.amd) {
+    define('classnames', [], function() {
+      return classNames;
+    });
+  }
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-modal@0.2.0/lib/helpers/ariaAppHider", [], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var _element = null;
+  function setElement(element) {
+    _element = element;
+  }
+  function hide(appElement) {
+    validateElement(appElement);
+    (appElement || _element).setAttribute('aria-hidden', 'true');
+  }
+  function show(appElement) {
+    validateElement(appElement);
+    (appElement || _element).removeAttribute('aria-hidden');
+  }
+  function toggle(shouldHide, appElement) {
+    if (shouldHide)
+      hide(appElement);
+    else
+      show(appElement);
+  }
+  function validateElement(appElement) {
+    if (!appElement && !_element)
+      throw new Error('react-modal: You must set an element with `Modal.setAppElement(el)` to make this accessible');
+  }
+  function resetForTesting() {
+    _element = null;
+  }
+  exports.toggle = toggle;
+  exports.setElement = setElement;
+  exports.show = show;
+  exports.hide = hide;
+  exports.resetForTesting = resetForTesting;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-modal@0.2.0/lib/helpers/injectCSS", [], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  module.exports = function() {
+    injectStyle(['.ReactModal__Overlay {', '  background-color: rgba(255, 255, 255, 0.75);', '}', '.ReactModal__Content {', '  position: absolute;', '  top: 40px;', '  left: 40px;', '  right: 40px;', '  bottom: 40px;', '  border: 1px solid #ccc;', '  background: #fff;', '  overflow: auto;', '  -webkit-overflow-scrolling: touch;', '  border-radius: 4px;', '  outline: none;', '  padding: 20px;', '}', '@media (max-width: 768px) {', '  .ReactModal__Content {', '    top: 10px;', '    left: 10px;', '    right: 10px;', '    bottom: 10px;', '    padding: 10px;', '  }', '}'].join('\n'));
+  };
+  function injectStyle(css) {
+    var style = document.getElementById('rackt-style');
+    if (!style) {
+      style = document.createElement('style');
+      style.setAttribute('id', 'rackt-style');
+      var head = document.getElementsByTagName('head')[0];
+      head.insertBefore(style, head.firstChild);
+    }
+    style.innerHTML = style.innerHTML + '\n' + css;
+  }
+  global.define = __define;
+  return module.exports;
+});
+
 System.register("npm:process@0.10.1", ["npm:process@0.10.1/browser"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -17876,6 +18455,15 @@ System.register("npm:lodash@3.9.3", ["npm:lodash@3.9.3/index"], true, function(r
   return module.exports;
 });
 
+System.register("npm:fastclick@1.0.6", ["npm:fastclick@1.0.6/lib/fastclick"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  module.exports = require("npm:fastclick@1.0.6/lib/fastclick");
+  global.define = __define;
+  return module.exports;
+});
+
 System.register("npm:object-assign@2.0.0", ["npm:object-assign@2.0.0/index"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -18296,6 +18884,75 @@ System.register("github:components/jquery@2.1.4", ["github:components/jquery@2.1
   }).call(this, __require('github:components/jquery@2.1.4/jquery'));
 });
 })();
+System.register("npm:react-modal@0.2.0/lib/helpers/focusManager", ["npm:react-modal@0.2.0/lib/helpers/tabbable"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var findTabbable = require("npm:react-modal@0.2.0/lib/helpers/tabbable");
+  var modalElement = null;
+  var focusLaterElement = null;
+  var needToFocus = false;
+  function handleBlur(event) {
+    needToFocus = true;
+  }
+  function handleFocus(event) {
+    if (needToFocus) {
+      needToFocus = false;
+      if (!modalElement) {
+        return ;
+      }
+      setTimeout(function() {
+        if (modalElement.contains(document.activeElement))
+          return ;
+        var el = (findTabbable(modalElement)[0] || modalElement);
+        el.focus();
+      }, 0);
+    }
+  }
+  exports.markForFocusLater = function() {
+    focusLaterElement = document.activeElement;
+  };
+  exports.returnFocus = function() {
+    try {
+      focusLaterElement.focus();
+    } catch (e) {
+      console.warn('You tried to return focus to ' + focusLaterElement + ' but it is not in the DOM anymore');
+    }
+    focusLaterElement = null;
+  };
+  exports.setupScopedFocus = function(element) {
+    modalElement = element;
+    if (window.addEventListener) {
+      window.addEventListener('blur', handleBlur, false);
+      document.addEventListener('focus', handleFocus, true);
+    } else {
+      window.attachEvent('onBlur', handleBlur);
+      document.attachEvent('onFocus', handleFocus);
+    }
+  };
+  exports.teardownScopedFocus = function() {
+    modalElement = null;
+    if (window.addEventListener) {
+      window.removeEventListener('blur', handleBlur);
+      document.removeEventListener('focus', handleFocus);
+    } else {
+      window.detachEvent('onBlur', handleBlur);
+      document.detachEvent('onFocus', handleFocus);
+    }
+  };
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:classnames@1.2.2", ["npm:classnames@1.2.2/index"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  module.exports = require("npm:classnames@1.2.2/index");
+  global.define = __define;
+  return module.exports;
+});
+
 System.register("github:jspm/nodelibs-process@0.1.1/index", ["npm:process@0.10.1"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -20344,6 +21001,151 @@ System.register("npm:react-router@0.13.3/lib/createRouter", ["npm:react@0.13.3",
   return module.exports;
 });
 
+System.register("npm:react-modal@0.2.0/lib/components/ModalPortal", ["npm:react@0.13.3", "npm:react-modal@0.2.0/lib/helpers/focusManager", "npm:react-modal@0.2.0/lib/helpers/scopeTab", "npm:classnames@1.2.2"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var React = require("npm:react@0.13.3");
+  var div = React.DOM.div;
+  var focusManager = require("npm:react-modal@0.2.0/lib/helpers/focusManager");
+  var scopeTab = require("npm:react-modal@0.2.0/lib/helpers/scopeTab");
+  var cx = require("npm:classnames@1.2.2");
+  var CLASS_NAMES = {
+    overlay: {
+      base: 'ReactModal__Overlay',
+      afterOpen: 'ReactModal__Overlay--after-open',
+      beforeClose: 'ReactModal__Overlay--before-close'
+    },
+    content: {
+      base: 'ReactModal__Content',
+      afterOpen: 'ReactModal__Content--after-open',
+      beforeClose: 'ReactModal__Content--before-close'
+    }
+  };
+  var OVERLAY_STYLES = {
+    position: 'fixed',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0
+  };
+  function stopPropagation(event) {
+    event.stopPropagation();
+  }
+  var ModalPortal = module.exports = React.createClass({
+    displayName: 'ModalPortal',
+    getInitialState: function() {
+      return {
+        afterOpen: false,
+        beforeClose: false
+      };
+    },
+    componentDidMount: function() {
+      if (this.props.isOpen) {
+        this.setFocusAfterRender(true);
+        this.open();
+      }
+    },
+    componentWillReceiveProps: function(newProps) {
+      if (!this.props.isOpen && newProps.isOpen) {
+        this.setFocusAfterRender(true);
+        this.open();
+      } else if (this.props.isOpen && !newProps.isOpen) {
+        this.close();
+      }
+    },
+    componentDidUpdate: function() {
+      if (this.focusAfterRender) {
+        this.focusContent();
+        this.setFocusAfterRender(false);
+      }
+    },
+    setFocusAfterRender: function(focus) {
+      this.focusAfterRender = focus;
+    },
+    open: function() {
+      focusManager.setupScopedFocus(this.getDOMNode());
+      focusManager.markForFocusLater();
+      this.setState({isOpen: true}, function() {
+        this.setState({afterOpen: true});
+      }.bind(this));
+    },
+    close: function() {
+      if (!this.ownerHandlesClose())
+        return ;
+      if (this.props.closeTimeoutMS > 0)
+        this.closeWithTimeout();
+      else
+        this.closeWithoutTimeout();
+    },
+    focusContent: function() {
+      this.refs.content.getDOMNode().focus();
+    },
+    closeWithTimeout: function() {
+      this.setState({beforeClose: true}, function() {
+        setTimeout(this.closeWithoutTimeout, this.props.closeTimeoutMS);
+      }.bind(this));
+    },
+    closeWithoutTimeout: function() {
+      this.setState({
+        afterOpen: false,
+        beforeClose: false
+      }, this.afterClose);
+    },
+    afterClose: function() {
+      focusManager.returnFocus();
+      focusManager.teardownScopedFocus();
+    },
+    handleKeyDown: function(event) {
+      if (event.keyCode == 9)
+        scopeTab(this.refs.content.getDOMNode(), event);
+      if (event.keyCode == 27)
+        this.requestClose();
+    },
+    handleOverlayClick: function() {
+      if (this.ownerHandlesClose())
+        this.requestClose();
+      else
+        this.focusContent();
+    },
+    requestClose: function() {
+      if (this.ownerHandlesClose())
+        this.props.onRequestClose();
+    },
+    ownerHandlesClose: function() {
+      return this.props.onRequestClose;
+    },
+    shouldBeClosed: function() {
+      return !this.props.isOpen && !this.state.beforeClose;
+    },
+    buildClassName: function(which) {
+      var className = CLASS_NAMES[which].base;
+      if (this.state.afterOpen)
+        className += ' ' + CLASS_NAMES[which].afterOpen;
+      if (this.state.beforeClose)
+        className += ' ' + CLASS_NAMES[which].beforeClose;
+      return className;
+    },
+    render: function() {
+      return this.shouldBeClosed() ? div() : (div({
+        ref: "overlay",
+        className: cx(this.buildClassName('overlay'), this.props.overlayClassName),
+        style: OVERLAY_STYLES,
+        onClick: this.handleOverlayClick
+      }, div({
+        ref: "content",
+        style: this.props.style,
+        className: cx(this.buildClassName('content'), this.props.className),
+        tabIndex: "-1",
+        onClick: stopPropagation,
+        onKeyDown: this.handleKeyDown
+      }, this.props.children)));
+    }
+  });
+  global.define = __define;
+  return module.exports;
+});
+
 System.register("github:jspm/nodelibs-process@0.1.1", ["github:jspm/nodelibs-process@0.1.1/index"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -21645,6 +22447,70 @@ System.register("npm:qs@2.4.1/index", ["npm:qs@2.4.1/lib/index"], true, function
   return module.exports;
 });
 
+System.register("npm:react-modal@0.2.0/lib/components/Modal", ["npm:react@0.13.3", "npm:react@0.13.3/lib/ExecutionEnvironment", "npm:react-modal@0.2.0/lib/components/ModalPortal", "npm:react-modal@0.2.0/lib/helpers/ariaAppHider", "npm:react-modal@0.2.0/lib/helpers/injectCSS"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var React = require("npm:react@0.13.3");
+  var ExecutionEnvironment = require("npm:react@0.13.3/lib/ExecutionEnvironment");
+  var ModalPortal = React.createFactory(require("npm:react-modal@0.2.0/lib/components/ModalPortal"));
+  var ariaAppHider = require("npm:react-modal@0.2.0/lib/helpers/ariaAppHider");
+  var injectCSS = require("npm:react-modal@0.2.0/lib/helpers/injectCSS");
+  var SafeHTMLElement = ExecutionEnvironment.canUseDOM ? window.HTMLElement : {};
+  var Modal = module.exports = React.createClass({
+    displayName: 'Modal',
+    statics: {
+      setAppElement: ariaAppHider.setElement,
+      injectCSS: injectCSS
+    },
+    propTypes: {
+      isOpen: React.PropTypes.bool.isRequired,
+      onRequestClose: React.PropTypes.func,
+      appElement: React.PropTypes.instanceOf(SafeHTMLElement),
+      closeTimeoutMS: React.PropTypes.number,
+      ariaHideApp: React.PropTypes.bool
+    },
+    getDefaultProps: function() {
+      return {
+        isOpen: false,
+        ariaHideApp: true,
+        closeTimeoutMS: 0
+      };
+    },
+    componentDidMount: function() {
+      this.node = document.createElement('div');
+      this.node.className = 'ReactModalPortal';
+      document.body.appendChild(this.node);
+      this.renderPortal(this.props);
+    },
+    componentWillReceiveProps: function(newProps) {
+      this.renderPortal(newProps);
+    },
+    componentWillUnmount: function() {
+      React.unmountComponentAtNode(this.node);
+      document.body.removeChild(this.node);
+    },
+    renderPortal: function(props) {
+      if (props.ariaHideApp) {
+        ariaAppHider.toggle(props.isOpen, props.appElement);
+      }
+      sanitizeProps(props);
+      if (this.portal)
+        this.portal.setProps(props);
+      else
+        this.portal = React.render(ModalPortal(props), this.node);
+    },
+    render: function() {
+      return null;
+    }
+  });
+  function sanitizeProps(props) {
+    delete props.ref;
+  }
+  global.define = __define;
+  return module.exports;
+});
+
 System.register("npm:react@0.13.3/lib/invariant", ["github:jspm/nodelibs-process@0.1.1"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -22082,6 +22948,15 @@ System.register("npm:qs@2.4.1", ["npm:qs@2.4.1/index"], true, function(require, 
   return module.exports;
 });
 
+System.register("npm:react-modal@0.2.0/lib/index", ["npm:react-modal@0.2.0/lib/components/Modal"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  module.exports = require("npm:react-modal@0.2.0/lib/components/Modal");
+  global.define = __define;
+  return module.exports;
+});
+
 System.register("npm:react@0.13.3/lib/keyMirror", ["npm:react@0.13.3/lib/invariant", "github:jspm/nodelibs-process@0.1.1"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -22407,6 +23282,15 @@ System.register("npm:react-router@0.13.3/lib/PathUtils", ["npm:react@0.13.3/lib/
     }
   };
   module.exports = PathUtils;
+  global.define = __define;
+  return module.exports;
+});
+
+System.register("npm:react-modal@0.2.0", ["npm:react-modal@0.2.0/lib/index"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  module.exports = require("npm:react-modal@0.2.0/lib/index");
   global.define = __define;
   return module.exports;
 });
@@ -23059,56 +23943,16 @@ System.register("build/js/pages/settings", ["npm:react@0.13.3"], function($__exp
       App = React.createClass({
         displayName: "App",
         render: function() {
-          return (React.createElement("div", {className: "list"}, React.createElement("div", {className: "item item-divider"}, "Settings"), React.createElement("div", {
-            className: "item item-toggle toggle-large ",
-            checked: "checked"
-          }, React.createElement("div", {"ng-transclude": ""}, React.createElement("span", {className: "ng-binding"}, "Wireless")), React.createElement("label", {className: "toggle disable-user-behavior"}, React.createElement("input", {
-            type: "checkbox",
-            className: " ",
-            checked: "checked"
-          }, "                                 "), React.createElement("div", {className: "track"}, React.createElement("div", {className: "handle"})))), React.createElement("div", {
-            className: "item item-toggle toggle-large ",
-            "ng-repeat": "item in settingsList",
-            "ng-model": "item.checked",
-            "ng-checked": "item.checked"
-          }, React.createElement("div", {"ng-transclude": ""}, React.createElement("span", {className: "ng-binding"}, "GPS")), React.createElement("label", {className: "toggle disable-user-behavior"}, React.createElement("input", {
-            type: "checkbox",
-            className: " "
-          }, "                                 "), React.createElement("div", {className: "track"}, React.createElement("div", {className: "handle"})))), React.createElement("div", {
-            className: "item item-toggle toggle-large ",
-            "ng-repeat": "item in settingsList",
-            "ng-model": "item.checked",
-            "ng-checked": "item.checked"
-          }, React.createElement("div", {"ng-transclude": ""}, React.createElement("span", {className: "ng-binding"}, "Bluetooth")), React.createElement("label", {className: "toggle disable-user-behavior"}, React.createElement("input", {
-            type: "checkbox",
-            "ng-model": "item.checked",
-            "ng-checked": "item.checked",
-            className: " "
-          }, "                                 "), React.createElement("div", {className: "track"}, React.createElement("div", {className: "handle"})))), React.createElement("div", {className: "item"}), React.createElement("div", {className: "item item-divider"}, "Notifications"), React.createElement("div", {
-            className: "item item-toggle toggle-large ",
-            "ng-model": "pushNotification.checked",
-            "ng-change": "pushNotificationChange()"
-          }, React.createElement("div", {"ng-transclude": ""}, React.createElement("span", null, "Push Notifications")), React.createElement("label", {className: "toggle disable-user-behavior"}, React.createElement("input", {
-            type: "checkbox",
-            "ng-model": "pushNotification.checked",
-            "ng-change": "pushNotificationChange()",
-            className: " "
-          }), React.createElement("div", {className: "track"}, React.createElement("div", {className: "handle"})))), React.createElement("div", {
-            className: "item item-toggle toggle-large ",
-            "toggle-className": "toggle-assertive",
-            "ng-model": "emailNotification",
-            "ng-true-value": "Subscribed",
-            "ng-false-value": "Unubscribed"
-          }, React.createElement("div", {"ng-transclude": ""}, React.createElement("span", null, "Newsletter")), React.createElement("label", {className: "toggle toggle-assertive disable-user-behavior"}, React.createElement("input", {
-            type: "checkbox",
-            "ng-model": "emailNotification",
-            "ng-true-value": "Subscribed",
-            "ng-false-value": "Unubscribed",
-            className: " "
-          }), React.createElement("div", {className: "track"}, React.createElement("div", {className: "handle"})))), React.createElement("div", {className: "item"}, React.createElement("pre", {
-            "ng-bind": "emailNotification | json",
-            className: "ng-binding"
-          }, "\"Subscribed\""))));
+          return (React.createElement("div", {className: "row"}, React.createElement("div", {className: "list"}, React.createElement("p", null, "Hi John, to edit your account, please call Allianz Global Services on +4971 2938 2818"), React.createElement("label", {className: "item item-input item-stacked-label"}, React.createElement("span", {className: "input-label"}, "First Name"), React.createElement("input", {
+            type: "text",
+            value: "John"
+          })), React.createElement("label", {className: "item item-input item-stacked-label"}, React.createElement("span", {className: "input-label"}, "Last Name"), React.createElement("input", {
+            type: "text",
+            value: "Suhr"
+          })), React.createElement("label", {className: "item item-input item-stacked-label"}, React.createElement("span", {className: "input-label"}, "Email"), React.createElement("input", {
+            type: "text",
+            value: "john@suhr.com"
+          })))));
         }
       });
       $__export('default', App);
@@ -23116,9 +23960,201 @@ System.register("build/js/pages/settings", ["npm:react@0.13.3"], function($__exp
   };
 });
 
-System.register("build/js/pages/alarm", ["npm:react@0.13.3"], function($__export) {
+System.register("build/js/pages/alarm", ["npm:react@0.13.3", "npm:react-router@0.13.3", "github:components/jquery@2.1.4"], function($__export) {
   "use strict";
   var __moduleName = "build/js/pages/alarm";
+  var React,
+      Router,
+      $,
+      RouteHandler,
+      Link,
+      App;
+  return {
+    setters: [function($__m) {
+      React = $__m.default;
+    }, function($__m) {
+      Router = $__m.default;
+    }, function($__m) {
+      $ = $__m.default;
+    }],
+    execute: function() {
+      RouteHandler = Router.RouteHandler, Link = Router.Link;
+      App = React.createClass({
+        displayName: "App",
+        getCurrentLocation: function() {
+          var now = new Date();
+          var deferred = $.Deferred();
+          navigator.geolocation.getCurrentPosition(function(a) {
+            console.log(a.coords);
+            hollowResponse.appointmentLatitude = a.coords.latitude;
+            hollowResponse.appointmentLongitude = a.coords.longitude;
+            deferred.resolve(hollowResponse);
+          }, deferred.reject);
+          return deferred.promise();
+        },
+        panicDegree1: function() {
+          this.getCurrentLocation().then(function(hollowResponse) {
+            console.warn(hollowResponse);
+          });
+        },
+        panicDegree2: function() {},
+        panicDegree3: function() {},
+        panicCall: function(msg) {
+          var obj = localStorage.getItem('contacts');
+          if ((obj === undefined) || (obj == null) || (obj == "undefined")) {
+            obj = {};
+          }
+          console.log('oldObject: ', obj);
+          try {
+            obj = JSON.parse(obj);
+          } catch (e) {
+            obj = {};
+          }
+          var users = [];
+          for (var key in obj) {
+            users.push({
+              name: key,
+              phone: obj[key]
+            });
+          }
+          var data = {
+            users: users,
+            message: msg
+          };
+          $.ajax({
+            type: 'POST',
+            url: 'http://sosapi.herokuapp.com/panic/amber',
+            data: JSON.stringify(data),
+            contentType: 'text/plain; charset=utf-8'
+          });
+        },
+        render: function() {
+          return (React.createElement("div", {className: "wrapper sos"}, React.createElement("ul", {
+            "data-role": "listview",
+            "data-inset": "true",
+            className: "ui-listview ui-listview-inset ui-corner-all ui-shadow"
+          }, React.createElement(Link, {to: "/sos/addContacts"}, React.createElement("li", {
+            "data-icon": "plus",
+            className: "ui-first-child"
+          }, React.createElement("a", {className: "ui-btn ui-btn-icon-right ui-icon-plus"}, "Add New Contact")))), React.createElement("button", {
+            onClick: this.panicDegree1,
+            className: "button button-block health-button button-balanced"
+          }, "I need assistance from friends"), React.createElement("button", {
+            onClick: this.panicDegree2,
+            className: "button button-block health-button button-energized"
+          }, "I am feeling unsafe"), React.createElement("button", {
+            onClick: this.panicDegree3,
+            className: "button button-block health-button button-assertive"
+          }, "I am in immediate danger")));
+        }
+      });
+      $__export('default', App);
+    }
+  };
+});
+
+System.register("build/js/pages/SOS", ["npm:react@0.13.3", "npm:lodash@3.9.3", "npm:react-router@0.13.3"], function($__export) {
+  "use strict";
+  var __moduleName = "build/js/pages/SOS";
+  var React,
+      _,
+      Router;
+  return {
+    setters: [function($__m) {
+      React = $__m.default;
+    }, function($__m) {
+      _ = $__m.default;
+    }, function($__m) {
+      Router = $__m.default;
+    }],
+    execute: function() {
+      $__export('default', React.createClass({
+        mixins: [Router.Navigation, Router.State],
+        render: function() {
+          var query = _.pairs(this.getQuery());
+          return (React.createElement("div", {className: "list card"}, query.map((function(pair) {
+            return pair.map;
+          }))));
+        }
+      }));
+    }
+  };
+});
+
+System.register("build/js/pages/addContacts", ["npm:react@0.13.3", "npm:react-router@0.13.3"], function($__export) {
+  "use strict";
+  var __moduleName = "build/js/pages/addContacts";
+  var React,
+      Router,
+      App;
+  return {
+    setters: [function($__m) {
+      React = $__m.default;
+    }, function($__m) {
+      Router = $__m.default;
+    }],
+    execute: function() {
+      App = React.createClass({
+        displayName: "App",
+        mixins: [Router.Navigation, Router.State],
+        getInitialState: function() {
+          return {
+            name: '',
+            number: ''
+          };
+        },
+        handleChange1: function(event) {
+          this.setState({name: event.target.value});
+        },
+        handleChange2: function(event) {
+          this.setState({number: event.target.value});
+        },
+        addContact: function() {
+          var obj = localStorage.getItem('contacts');
+          if ((obj === undefined) || (obj == null) || (obj == "undefined")) {
+            obj = {};
+          }
+          console.log('oldObject: ', obj);
+          try {
+            obj = JSON.parse(obj);
+          } catch (e) {
+            obj = {};
+          }
+          obj[this.state.name] = this.state.number;
+          localStorage.setItem('contacts', JSON.stringify(obj));
+          console.log('newObject: ', obj);
+          this.goBack();
+        },
+        render: function() {
+          return (React.createElement("div", {className: "wrapper sos"}, React.createElement("h1", null, "Add New Contact"), React.createElement("label", null, "Name:"), React.createElement("input", {
+            type: "text",
+            name: "name",
+            id: "name",
+            value: this.state.name,
+            onChange: this.handleChange1,
+            placeholder: "Contact Name"
+          }), React.createElement("label", null, "Number:"), React.createElement("input", {
+            type: "tel",
+            name: "number",
+            id: "number",
+            value: this.state.number,
+            onChange: this.handleChange2,
+            placeholder: "Contact Number"
+          }), React.createElement("button", {
+            id: "addContact",
+            onClick: this.addContact,
+            className: "ui-shadow ui-btn ui-corner-all ui-btn-inline ui-btn-b ui-mini"
+          }, "Add Contact")));
+        }
+      });
+      $__export('default', App);
+    }
+  };
+});
+
+System.register("build/js/pages/phoneContacts", ["npm:react@0.13.3"], function($__export) {
+  "use strict";
+  var __moduleName = "build/js/pages/phoneContacts";
   var React,
       App;
   return {
@@ -23129,7 +24165,23 @@ System.register("build/js/pages/alarm", ["npm:react@0.13.3"], function($__export
       App = React.createClass({
         displayName: "App",
         render: function() {
-          return (React.createElement("div", null, React.createElement("h1", null, "HOMEPAGE")));
+          return (React.createElement("div", {className: "wrapper"}, React.createElement("ul", {
+            "data-role": "listview",
+            "data-inset": "true",
+            className: "ui-listview ui-listview-inset ui-corner-all ui-shadow"
+          }, React.createElement("li", {
+            "data-icon": "plus",
+            className: "ui-first-child"
+          }, React.createElement("a", {
+            href: "add.html",
+            className: "ui-btn ui-btn-icon-right ui-icon-plus"
+          }, "Add New Contact")), React.createElement("li", {
+            "data-icon": "search",
+            className: "ui-last-child"
+          }, React.createElement("a", {
+            href: "find.html",
+            className: "ui-btn ui-btn-icon-right ui-icon-search"
+          }, "Find Contact")))));
         }
       });
       $__export('default', App);
@@ -23137,29 +24189,37 @@ System.register("build/js/pages/alarm", ["npm:react@0.13.3"], function($__export
   };
 });
 
-System.register("build/js/pages/map", ["npm:react@0.13.3", "github:components/jquery@2.1.4"], function($__export) {
+System.register("build/js/pages/map", ["npm:react@0.13.3", "github:components/jquery@2.1.4", "npm:lodash@3.9.3"], function($__export) {
   "use strict";
   var __moduleName = "build/js/pages/map";
   var React,
       $,
+      _,
       App;
   return {
     setters: [function($__m) {
       React = $__m.default;
     }, function($__m) {
       $ = $__m.default;
+    }, function($__m) {
+      _ = $__m.default;
     }],
     execute: function() {
       App = React.createClass({
         displayName: "App",
         getInitialState: function() {
           return {
-            lat: 0,
-            lng: 0,
+            lat: null,
+            lng: null,
+            deviceLat: null,
+            deviceLng: null,
             map: null,
-            mapZoom: 17,
-            crimeApiURL: 'http://data.police.uk/api/crimes-street/all-crime',
-            crimeData: null
+            mapZoom: 15,
+            heatmapRadius: 15,
+            crimeApiURLRoot: 'http://data.police.uk/api/crimes-street/all-crime',
+            crimeData: null,
+            mapDragListener: false,
+            mapZoomListener: false
           };
         },
         getLocationAndMap: function() {
@@ -23169,47 +24229,338 @@ System.register("build/js/pages/map", ["npm:react@0.13.3", "github:components/jq
               self.setState({
                 lng: position.coords.longitude,
                 lat: position.coords.latitude,
-                crimeApiURL: self.state.crimeApiURL + '?lat=' + position.coords.latitude + '&lng=' + position.coords.longitude
+                deviceLng: position.coords.longitude,
+                deviceLat: position.coords.latitude
               });
               self.getCrimeMap();
             });
           } else {
-            console.log("Geolocation is not supported by this browser.");
+            alter("Sorry, Geolocation is not supported by this browser.");
           }
         },
         getCrimeMap: function() {
-          $.get(this.state.crimeApiURL, function(result) {
+          var self = this;
+          var heatmapGradient = ['rgba(248,177,177,0)', 'rgba(248,177,177,0)', 'rgba(248,177,177,0)', 'rgba(248,177,177,0)', 'rgba(234,65,65,1)', 'rgba(229,48,48,1)', 'rgba(229,48,48,1)', 'rgba(229,36,36,1)', 'rgba(229,36,36,1)', 'rgba(230,24,24,1)', 'rgba(230,24,24,1)', 'rgba(223,6,6,1)', 'rgba(223,6,6,1)', 'rgba(194,1,1,1)', 'rgba(194,1,1,1)'];
+          var ApiURL = self.state.crimeApiURLRoot + '?lat=' + self.state.lat + '&lng=' + self.state.lng;
+          $('.map-overlay').show();
+          $.get(ApiURL, function(result) {
+            $('.map-overlay').hide();
             if (this.isMounted()) {
-              var mapProp = {
-                center: new google.maps.LatLng(this.state.lat, this.state.lng),
-                zoom: this.state.mapZoom,
-                mapTypeId: google.maps.MapTypeId.ROADMAP
-              };
-              var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
-              var iconImg = {
-                url: 'build/img/red-dot-hi.png',
-                size: new google.maps.Size(20, 20)
-              };
+              var map;
+              if (!self.state.map) {
+                var mapProp = {
+                  center: new google.maps.LatLng(this.state.lat, this.state.lng),
+                  zoom: this.state.mapZoom,
+                  mapTypeId: google.maps.MapTypeId.ROADMAP
+                };
+                map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
+                self.setState({map: map});
+                var devicePosition = new google.maps.LatLng(self.state.deviceLat, self.state.deviceLng);
+                var marker = new google.maps.Marker({position: devicePosition});
+                marker.setMap(map);
+              } else {
+                map = self.state.map;
+              }
+              var list = [];
               result.forEach(function(item) {
                 var lat = item.location.latitude;
-                var lon = item.location.longitude;
-                var marker = new google.maps.Marker({
-                  position: new google.maps.LatLng(lat, lon),
-                  map: map,
-                  icon: iconImg
-                });
+                var lng = item.location.longitude;
+                list.push(new google.maps.LatLng(lat, lng));
               });
+              var pointArray = new google.maps.MVCArray(list);
+              var center = new google.maps.LatLng(self.state.lat, self.state.lng);
+              if (self.state.heatmap) {
+                self.state.heatmap.setMap(null);
+              }
+              var heatmap = new google.maps.visualization.HeatmapLayer({
+                center: center,
+                data: pointArray,
+                radius: self.state.heatmapRadius
+              });
+              self.setState({heatmap: heatmap});
+              heatmap.setMap(map);
+              heatmap.set('gradient', heatmapGradient);
+              var debouncedCrimeMap = _.debounce(self.getCrimeMap, 500);
+              if (!self.state.mapDragListener) {
+                self.setState({mapDragListener: true});
+                google.maps.event.addListener(self.state.map, 'dragend', function() {
+                  var map = self.state.map;
+                  var c = map.getCenter();
+                  var newLat = c.lat();
+                  var newLng = c.lng();
+                  var dist = self.getDistanceFromLatLonInKm(self.state.lat, self.state.lng, newLat, newLng);
+                  if (dist > 0.5) {
+                    self.setState({
+                      lng: newLng,
+                      lat: newLat
+                    });
+                    debouncedCrimeMap();
+                  }
+                });
+              }
+              if (!self.state.mapZoomListener) {
+                self.setState({mapZoomListener: true});
+                google.maps.event.addListener(self.state.map, 'zoom_changed', function() {
+                  var map = self.state.map;
+                  var newZoom = map.getZoom();
+                  self.setState({mapZoom: newZoom});
+                  heatmap.set('radius', parseInt(newZoom * 1));
+                });
+              }
             }
           }.bind(this));
         },
         render: function() {
-          return (React.createElement("div", null, React.createElement("h1", null, "map"), React.createElement("div", {id: "googleMap"})));
+          var width = parseInt($(window).width()) - 40;
+          var height = '500';
+          var mapStyle = {
+            width: width,
+            height: height
+          };
+          return (React.createElement("div", {className: "map-wrapper"}, React.createElement("div", {className: "map-overlay"}, React.createElement("div", {className: "loading-txt"}, "Loading...")), React.createElement("div", {
+            id: "googleMap",
+            style: mapStyle
+          })));
         },
         componentDidMount: function() {
-          this.getLocationAndMap();
+          if (!this.lat || !this.lng) {
+            this.getLocationAndMap();
+          }
+        },
+        getDistanceFromLatLonInKm: function(lat1, lon1, lat2, lon2) {
+          var R = 6371;
+          var dLat = this.deg2rad(lat2 - lat1);
+          var dLon = this.deg2rad(lon2 - lon1);
+          var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+          ;
+          var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          var d = R * c;
+          return d;
+        },
+        deg2rad: function(deg) {
+          return deg * (Math.PI / 180);
         }
       });
       $__export('default', App);
+    }
+  };
+});
+
+System.register("build/js/components/assistanceButton", ["npm:react@0.13.3", "npm:react-router@0.13.3", "npm:react-modal@0.2.0", "github:components/jquery@2.1.4"], function($__export) {
+  "use strict";
+  var __moduleName = "build/js/components/assistanceButton";
+  var React,
+      Router,
+      Modal,
+      $;
+  return {
+    setters: [function($__m) {
+      React = $__m.default;
+    }, function($__m) {
+      Router = $__m.default;
+    }, function($__m) {
+      Modal = $__m.default;
+    }, function($__m) {
+      $ = $__m.default;
+    }],
+    execute: function() {
+      window.allianzAPIKey = "test-apiKey-1";
+      $__export('default', React.createClass({
+        mixins: [Router.Navigation, Router.State],
+        getInitialState: function() {
+          var $__0 = this;
+          console.log(this.getAssistanceType(this.getPathname()));
+          var assistanceTypeRequested = (function() {
+            return $__0.props.assistanceType ? $__0.props.assistanceType : $__0.getPathname().substr(1);
+          });
+          if (!this.props.assistanceType) {
+            setInterval((function() {
+              $__0.setState({assistanceInfo: $__0.getAssistanceType(assistanceTypeRequested()) || {}});
+            }), 1000);
+          }
+          return {
+            modalIsOpen: false,
+            assistanceInfo: this.getAssistanceType(assistanceTypeRequested()) || {}
+          };
+        },
+        confirmServiceRequest: function() {
+          var self = this;
+          var postInfo = this.getServiceRequestDetails();
+          postInfo.then(function(fulfilledPost) {
+            return $.when($.post('https://aai-api.com/api/serviceOrders?apiKey=' + window.allianzAPIKey, fulfilledPost));
+          }).then(function(data) {
+            self.setState({'appointmentConfirmation': data});
+            console.log(data);
+          });
+        },
+        getAssistanceType: function(type) {
+          switch (type) {
+            case 'health':
+              var obj = {
+                "code": "50007",
+                header: "Assistance with Medical Advice",
+                "name": "Medical advice",
+                "description": "In case you have medical problems on your travel and need expertise from a physician.",
+                "price": 79
+              };
+              return obj;
+              break;
+            case 'healthInsuranceGlobal':
+              var obj = {
+                "code": "50007",
+                header: "Assistance with Medical Advice",
+                "name": "Medical advice",
+                "description": "In case you have medical problems on your travel and need expertise from a physician.",
+                "price": 79
+              };
+              return obj;
+              break;
+            case 'healthInsuranceSingleCountry':
+              var obj = {
+                "code": "50007",
+                header: "Assistance with Medical Advice",
+                "name": "Medical advice",
+                "description": "In case you have medical problems on your travel and need expertise from a physician.",
+                "price": 79
+              };
+              return obj;
+              break;
+            case 'car':
+              var obj = {
+                "code": "1005",
+                "category": "ROADSIDE",
+                "type": "PAY_PER_USE",
+                "name": "Roadside Assistance services",
+                "description": "We tow or repair your vehicle or repair on spot if possible.",
+                "price": 0
+              };
+              return obj;
+              break;
+            case 'crime':
+              break;
+            case 'map':
+              var obj = {
+                "code": "50004",
+                "name": "Robbery",
+                "description": "Help in case of robbery",
+                "price": 19
+              };
+              return obj;
+              break;
+            case 'crimeMap':
+              var obj = {
+                "code": "1007",
+                "category": "TRAVEL",
+                "type": "SUBSCRIPTION",
+                "name": "Single Trip EU Travel Insurance",
+                "description": "1 day travel insurance for one person, including cancellation, medical advice, medical costs, repatriation, personal accident cover. Remark: Add number of days and travelers as multiplicator.",
+                "price": 1.99
+              };
+              return obj;
+              break;
+            default:
+              console.log(this.state);
+              break;
+          }
+        },
+        getServiceRequestDetails: function() {
+          var now = new Date();
+          var hollowResponse = {
+            "appointmentDate": now.toISOString(),
+            "appointmentAddress": "string",
+            "appointmentLatitude": 0,
+            "appointmentLongitude": 0,
+            "description": "string",
+            "serviceCode": "50004",
+            "supplierCode": "1002",
+            "paymentMethod": "CREDIT_CARD",
+            "creditCardNumber": "string",
+            "creditCardValidationCode": "string",
+            "creditCardValidUntilMonth": 2,
+            "creditCardValidUntilYear": 2020
+          };
+          var deferred = $.Deferred();
+          navigator.geolocation.getCurrentPosition(function(a) {
+            console.log(a.coords);
+            hollowResponse.appointmentLatitude = a.coords.latitude;
+            hollowResponse.appointmentLongitude = a.coords.longitude;
+            deferred.resolve(hollowResponse);
+          }, deferred.reject);
+          return deferred.promise();
+        },
+        closeModal: function() {
+          this.setState({modalIsOpen: false});
+        },
+        openModal: function() {
+          this.setState({modalIsOpen: true});
+        },
+        render: function() {
+          console.log(this.state.appointmentConfirmation);
+          var divStyle = {width: '100%'};
+          if (!this.state.appointmentConfirmation) {
+            var modalContents = React.createElement("div", {className: "scroll"}, React.createElement("h2", null, this.state.assistanceInfo.header), "Allianz can assist you anywhere you are.", React.createElement("h5", null, "Service details"), React.createElement("span", null, this.state.assistanceInfo.description), React.createElement("h5", null, " Service cost"), "This service costs $", React.createElement("span", null, this.state.assistanceInfo.price), "." + ' ' + "An Allianz service personal will be sent to your location as soon as possible", React.createElement("div", null, React.createElement("button", {
+              onClick: this.confirmServiceRequest,
+              className: "button button-positive"
+            }, "Confirm service request"), React.createElement("button", {
+              onClick: this.closeModal,
+              className: "button"
+            }, "Cancel")));
+          } else {
+            var modalContents = React.createElement("div", {className: "scroll"}, React.createElement("h2", null, "Success"), "You have an appointment", React.createElement("span", null, ' ' + this.state.appointmentConfirmation.status), "with an Allianz professional on", React.createElement("span", null, ' ' + this.state.appointmentConfirmation.appointmentDate), React.createElement("div", null, React.createElement("button", {
+              onClick: this.closeModal,
+              className: "button"
+            }, "Close")));
+          }
+          return (React.createElement("div", {style: divStyle}, React.createElement("button", {
+            onClick: this.openModal,
+            className: this.props.buttonClasses
+          }, this.props.buttonText), React.createElement(Modal, {
+            isOpen: this.state.modalIsOpen,
+            onRequestClose: this.closeModal
+          }, React.createElement("div", {className: "padding scroll-content ionic-scroll"}, modalContents))));
+        }
+      }));
+    }
+  };
+});
+
+System.register("build/js/pages/health", ["build/js/components/assistanceButton", "npm:react@0.13.3"], function($__export) {
+  "use strict";
+  var __moduleName = "build/js/pages/health";
+  var AssistanceButton,
+      React;
+  return {
+    setters: [function($__m) {
+      AssistanceButton = $__m.default;
+    }, function($__m) {
+      React = $__m.default;
+    }],
+    execute: function() {
+      $__export('default', React.createClass({render: function() {
+          var h1Style = {
+            textAlign: 'center',
+            paddingTop: '40px',
+            margin: '10px',
+            marginLeft: '12%'
+          };
+          var buttonStyle = {
+            display: 'block',
+            paddingTop: '40px'
+          };
+          return (React.createElement("div", null, React.createElement("h1", {style: h1Style}, "Get medical assistance in one tap!"), React.createElement(AssistanceButton, {
+            buttonClasses: "button button-block health-button button-royal",
+            buttonText: "Get insurance where you are",
+            assistanceType: "healthInsuranceSingleCountry"
+          }), React.createElement(AssistanceButton, {
+            buttonClasses: "button button-block health-button button-positive",
+            buttonText: "Get immediate assistance!",
+            assistanceType: "immediateAssistance"
+          }), React.createElement(AssistanceButton, {
+            buttonClasses: "button button-block health-button button-energized",
+            buttonText: "Get insurance internationally!",
+            assistanceType: "healthInsuranceGlobal"
+          }), React.createElement(AssistanceButton, {buttonClasses: ""})));
+        }}));
     }
   };
 });
@@ -23221,6 +24572,7 @@ System.register("build/js/pages/home", ["npm:react@0.13.3", "npm:lodash@3.9.3", 
       _,
       Router,
       Link,
+      isActivated,
       Minis,
       App;
   return {
@@ -23233,19 +24585,26 @@ System.register("build/js/pages/home", ["npm:react@0.13.3", "npm:lodash@3.9.3", 
     }],
     execute: function() {
       Link = Router.Link;
+      isActivated = (function(name) {
+        var activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
+        return ~activated.indexOf(name);
+      });
       Minis = React.createClass({
         displayName: "Minis",
-        handleClick: function(event) {
-          var el = event.target,
-              activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
-          activated.push(el.textContent);
-          localStorage.setItem('activated-mini-apps', JSON.stringify(activated));
-          el.parentNode.classList.add('activated');
+        mixins: [Router.Navigation],
+        handleClick: function(mini) {
+          var activated = JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
+          if (isActivated(mini.name)) {
+            this.transitionTo(mini.route);
+          } else {
+            activated.push(mini.name);
+            localStorage.setItem('activated-mini-apps', JSON.stringify(activated));
+            document.querySelector('.' + _.kebabCase(mini.name)).classList.add('activated');
+          }
         },
         _touch: {},
-        touch: function(event) {
+        touch: function(event, mini) {
           var now = Date.now(),
-              el = event.target,
               type = event.type;
           if (type === 'touchstart') {
             this._touch.started = Date.now();
@@ -23257,10 +24616,10 @@ System.register("build/js/pages/home", ["npm:react@0.13.3", "npm:lodash@3.9.3", 
               var activated = (function() {
                 return JSON.parse(localStorage.getItem('activated-mini-apps')) || [];
               });
-              localStorage.setItem('activated-mini-apps', JSON.stringify(_.without(activated(), el.textContent)));
-              el.parentNode.classList.remove('activated');
+              localStorage.setItem('activated-mini-apps', JSON.stringify(_.without(activated(), mini.name)));
+              document.querySelector('.' + _.kebabCase(mini.name)).classList.remove('activated');
             } else if (duration > 0) {
-              return this.handleClick(event);
+              return this.handleClick(mini);
             }
             delete this._touch.started;
           } else if (type === 'touchcancel') {
@@ -23272,39 +24631,23 @@ System.register("build/js/pages/home", ["npm:react@0.13.3", "npm:lodash@3.9.3", 
         render: function() {
           var $__0 = this;
           var minis = this.props.minis;
-          return (React.createElement("div", null, _.chunk(minis, 2).map((function(minis2, i) {
-            var link0 = minis[i * 2].route ? React.createElement(Link, {
-              to: minis[i * 2].route,
-              className: "col",
-              onTouchStart: $__0.touch,
-              onTouchEnd: $__0.touch,
-              onTouchCancel: $__0.touch,
-              onTouchMove: $__0.touch
-            }, React.createElement("div", {className: "vert-helper"}), React.createElement("img", {src: ("build/img/icon-" + (i * 2 + 1) + ".png")})) : React.createElement("div", {
-              className: "col",
-              onTouchStart: $__0.touch,
-              onTouchEnd: $__0.touch,
-              onTouchCancel: $__0.touch,
-              onTouchMove: $__0.touch
-            }, React.createElement("div", {className: "vert-helper"}), React.createElement("img", {src: ("build/img/icon-" + (i * 2 + 1) + ".png")}));
-            var link1 = minis[i * 2 + 1].route ? React.createElement(Link, {
-              to: minis[i * 2].route,
-              className: "col",
-              onTouchStart: $__0.touch,
-              onTouchEnd: $__0.touch,
-              onTouchCancel: $__0.touch,
-              onTouchMove: $__0.touch
-            }, React.createElement("div", {className: "vert-helper"}), React.createElement("img", {src: ("build/img/icon-" + (i * 2 + 2) + ".png")})) : React.createElement("div", {
-              className: "col",
-              onTouchStart: $__0.touch,
-              onTouchEnd: $__0.touch,
-              onTouchCancel: $__0.touch,
-              onTouchMove: $__0.touch
-            }, React.createElement("div", {className: "vert-helper"}), React.createElement("img", {src: ("build/img/icon-" + (i * 2 + 2) + ".png")}));
+          return (React.createElement("div", null, minis.map((function(mini, i) {
+            var shouldBeActivated = isActivated(mini.name);
+            var handle = (function(event) {
+              return $__0.touch(event, mini);
+            });
+            var divStyle = {backgroundImage: ("url(build/img/" + mini.logo + ".svg)")};
             return (React.createElement("div", {
-              key: i,
-              className: "row minis"
-            }, link0, link1));
+              className: "card minis",
+              onTouchStart: handle,
+              onTouchEnd: handle,
+              onTouchCancel: handle,
+              onTouchMove: handle,
+              key: i
+            }, React.createElement("div", {
+              className: "item item-image" + (shouldBeActivated ? " activated" : "") + " " + _.kebabCase(mini.name),
+              style: divStyle
+            }, React.createElement("h3", null, mini.name), React.createElement("p", null, mini.description))));
           }))));
         }
       });
@@ -23313,27 +24656,30 @@ System.register("build/js/pages/home", ["npm:react@0.13.3", "npm:lodash@3.9.3", 
         render: function() {
           var minis = [{
             name: 'CrimeMapper',
-            logo: '',
+            description: 'Travel safely through an unknown environment',
+            logo: 'icon-1',
             route: 'crimeMapper'
           }, {
-            name: 'SOS',
-            logo: '',
+            name: 'Guardian',
+            description: "Call a guardian if you're feeling unsafe",
+            logo: 'icon-2',
             route: 'SOS'
           }, {
-            name: 'example app 3',
-            logo: '',
+            name: 'Health Emergency',
+            description: 'Get assistance fast',
+            logo: 'health_emergency',
+            route: 'health'
+          }, {
+            name: 'WithYou',
+            description: "Audio directions so you look like you know where you're going",
             route: ''
           }, {
-            name: 'example app 4',
-            logo: '',
+            name: 'Make Your Meeting',
+            description: "Audio directions so you look like you know where you're going",
             route: ''
           }, {
-            name: 'example app 5',
-            logo: '',
-            route: ''
-          }, {
-            name: 'example app 6',
-            logo: '',
+            name: 'WIFInder',
+            description: "Find the connectivity you need",
             route: ''
           }, {
             name: 'example app 7',
@@ -23352,15 +24698,23 @@ System.register("build/js/pages/home", ["npm:react@0.13.3", "npm:lodash@3.9.3", 
   };
 });
 
-System.register("build/js/main", ["npm:react@0.13.3", "build/js/pages/home", "build/js/pages/settings", "build/js/pages/map", "build/js/pages/alarm", "npm:react-router@0.13.3"], function($__export) {
+System.register("build/js/main", ["npm:react@0.13.3", "npm:lodash@3.9.3", "npm:fastclick@1.0.6", "build/js/pages/home", "build/js/pages/settings", "build/js/pages/map", "build/js/pages/alarm", "build/js/pages/health", "build/js/pages/SOS", "build/js/pages/addContacts", "build/js/pages/phoneContacts", "build/js/components/assistanceButton", "npm:react-router@0.13.3", "npm:react-modal@0.2.0"], function($__export) {
   "use strict";
   var __moduleName = "build/js/main";
   var React,
+      _,
+      attachFastClick,
       homePage,
       settingsPage,
       crimeMapper,
+      guardian,
+      health,
       SOS,
+      addContacts,
+      phoneContacts,
+      AssistanceButton,
       Router,
+      Modal,
       Route,
       DefaultRoute,
       NotFoundRoute,
@@ -23373,27 +24727,51 @@ System.register("build/js/main", ["npm:react@0.13.3", "build/js/pages/home", "bu
     setters: [function($__m) {
       React = $__m.default;
     }, function($__m) {
+      _ = $__m.default;
+    }, function($__m) {
+      attachFastClick = $__m.default;
+    }, function($__m) {
       homePage = $__m.default;
     }, function($__m) {
       settingsPage = $__m.default;
     }, function($__m) {
       crimeMapper = $__m.default;
     }, function($__m) {
+      guardian = $__m.default;
+    }, function($__m) {
+      health = $__m.default;
+    }, function($__m) {
       SOS = $__m.default;
     }, function($__m) {
+      addContacts = $__m.default;
+    }, function($__m) {
+      phoneContacts = $__m.default;
+    }, function($__m) {
+      AssistanceButton = $__m.default;
+    }, function($__m) {
       Router = $__m.default;
+    }, function($__m) {
+      Modal = $__m.default;
     }],
     execute: function() {
       'use strict';
+      Modal.setAppElement(document.querySelector('#app'));
+      attachFastClick(document.body);
       Route = Router.Route, DefaultRoute = Router.DefaultRoute, NotFoundRoute = Router.NotFoundRoute, Redirect = Router.Redirect, RouteHandler = Router.RouteHandler, Link = Router.Link;
       App = React.createClass({
         displayName: "App",
-        mixins: [Router.Navigation],
+        mixins: [Router.Navigation, Router.State],
         render: function() {
-          return (React.createElement("div", null, React.createElement("div", {className: "bar-positive bar bar-header disable-user-behavior"}, React.createElement(Link, {to: "settings"}, React.createElement("button", {className: "button button-icon icon ion-navicon-round"})), React.createElement("h1", {className: "title"}, "CoPilot"), React.createElement("button", {
-            className: "button button-clear button-light",
-            onClick: this.goBack
-          }, "Back")), React.createElement("div", {className: "scroll-content ionic-scroll"}, React.createElement("div", {className: "scroll"}, React.createElement(RouteHandler, null)))));
+          var isHome = this.getPathname() === '/';
+          var goSettings = _.partial(this.transitionTo, 'settings');
+          return (React.createElement("div", null, React.createElement("div", {className: "bar-dark bar bar-header disable-user-behavior"}, React.createElement("button", {
+            className: "button button-clear",
+            onClick: isHome ? goSettings : this.goBack
+          }, isHome ? '☰' : '〈 Back'), React.createElement("h1", {className: "title"}, "CoPilot"), React.createElement(AssistanceButton, {
+            assistanceType: "health",
+            buttonText: "SOS",
+            buttonClasses: "button button-clear button-SOS"
+          })), React.createElement("div", {className: "scroll-content ionic-scroll"}, React.createElement("div", {className: "scroll"}, React.createElement(RouteHandler, null)))));
         }
       });
       routes = (React.createElement(Route, {
@@ -23407,8 +24785,24 @@ System.register("build/js/main", ["npm:react@0.13.3", "build/js/pages/home", "bu
         name: "crimeMapper",
         handler: crimeMapper
       }), React.createElement(Route, {
+        name: "guardian",
+        handler: guardian
+      }), React.createElement(Route, {
+        name: "health",
+        path: "health",
+        handler: health
+      }), React.createElement(Route, {
         name: "SOS",
+        path: "sos",
         handler: SOS
+      }), React.createElement(Route, {
+        name: "addContacts",
+        path: "/sos/addContacts",
+        handler: addContacts
+      }), React.createElement(Route, {
+        name: "phoneContacts",
+        path: "/sos/phoneContacts",
+        handler: phoneContacts
       }), React.createElement(Route, {
         name: "settings",
         handler: settingsPage,
