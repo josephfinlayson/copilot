@@ -15,7 +15,7 @@ export default React.createClass({
             assistanceTypeRequested = this.props.assistanceType;
         }
         else {
-            assistanceTypeRequested = this.getPathname();
+            assistanceTypeRequested = this.getPathname().substr(1);
         }
         return {
             modalIsOpen: false,
