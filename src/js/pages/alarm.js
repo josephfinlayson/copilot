@@ -33,7 +33,15 @@ var App = React.createClass({
             users: users,
             message: "form app"
         };
-        $.post('http://sosapi.herokuapp.com/panic/amber', JSON.stringify(data))
+
+        $.ajax({
+            type: 'POST',
+            url: 'http://sosapi.herokuapp.com/panic/amber',
+            data: JSON.stringify(data),
+            contentType:'text/plain; charset=utf-8'
+        })
+
+        // $.post('http://localhost:8888/panic/amber', data, function(a){console.log(a)}, 'json')
     },
     render() {
         return (
