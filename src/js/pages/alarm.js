@@ -86,7 +86,7 @@ var App = React.createClass({
             data: JSON.stringify(data),
             contentType:'text/plain; charset=utf-8'
         })
-
+        alert("Your contact(s) have now been notified!")
         // $.post('http://localhost:8888/panic/amber', data, function(a){console.log(a)}, 'json')
     },
     render() {

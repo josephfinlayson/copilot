@@ -335,7 +335,7 @@ export default React.createClass({
                 //     "price": 79
                 // }
                 // return obj;
-                return products['1008']['services']['50007'];
+                return products['1010']
                 break;
 
             case 'immediateAssistance':
@@ -430,11 +430,11 @@ export default React.createClass({
                 <h2>{this.state.assistanceInfo.header}</h2>
                 Allianz can assist you anywhere you are.
                 <h2>{this.state.assistanceInfo.name}</h2>
-                <h5>Service details</h5>
+                <h4>Service details</h4>
                 <span>
                             {this.state.assistanceInfo.description}
                 </span>
-                <h5> Service cost</h5>
+                <h4> Service cost</h4>
                 This service costs $
                 <span>{this.state.assistanceInfo.price}</span>
                 .
@@ -454,12 +454,17 @@ export default React.createClass({
             var modalContents = <div className="scroll">
                 <h2>Success</h2>
                 You have an appointment
-                <span>{' ' + this.state.appointmentConfirmation.status}</span>
+                <span>{' ' + this.state.appointmentConfirmation.status + ' '}</span>
                 with an Allianz professional on
-                <span>{' ' + this.state.appointmentConfirmation.appointmentDate}</span>
+                <span>{' ' + this.state.appointmentConfirmation.appointmentDate + ' '}</span>
+                <p> Your appointment will be at latitude <span>{' ' +  this.state.appointmentConfirmation.appointmentLatitude + ' '}</span>
+                and longitude <span>{' ' + this.state.appointmentConfirmation.appointmentLongitude + '.'}</span>
+                </p>
+
+                <img src="build/img/map.png"></img>
                 <div>
                     <button onClick={this.closeModal}
-                        className="button">
+                        className="button align-right">
                         Close
                     </button>
                 </div>
