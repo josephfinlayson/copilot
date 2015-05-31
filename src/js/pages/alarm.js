@@ -90,7 +90,7 @@ var App = React.createClass({
     render() {
         return (
 		<div className="wrapper sos">
-			<ul data-role="listview" data-inset="true" className="ui-listview ui-listview-inset ui-corner-all ui-shadow">
+			<ul data-role="listview" data-inset="true" className="ui-listview ui-listview-inset ui-corner-all ui-shadow new-contact">
 			<Link to="/sos/addContacts">
                 <li data-icon="plus" className="ui-first-child"><a  className="ui-btn ui-btn-icon-right ui-icon-plus">Add New Contact</a>
                 </li>
@@ -99,7 +99,7 @@ var App = React.createClass({
             <button onClick={this.panicDegree1}
                 className="button button-block health-button button-balanced">
                 I need assistance from friends
-                
+
             </button>
                       <button onClick={this.panicDegree2}
                 className="button button-block health-button button-energized">
@@ -111,9 +111,9 @@ var App = React.createClass({
             </button>
         </div>
 
-            
 
-   
+
+
         )
     }
 });
