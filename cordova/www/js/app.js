@@ -23995,7 +23995,7 @@ System.register("build/js/pages/alarm", ["npm:react@0.13.3", "npm:react-router@0
           this.getCurrentLocation().then(function(coords) {
             console.log(coords);
             var mapsUrl = "http://maps.google.com/maps?z=12&t=m&q=loc:" + coords.latitude + "+" + coords.longitude;
-            self.panicCall(" I'm feeling a bit unsafe right now. Could you give me a call? I'm at " + mapsUrl);
+            self.panicCall(" It's John Suhr. I'm feeling a bit unsafe right now. Could you give me a call? I'm at " + mapsUrl);
           });
         },
         panicDegree2: function() {
@@ -24003,7 +24003,7 @@ System.register("build/js/pages/alarm", ["npm:react@0.13.3", "npm:react-router@0
           this.getCurrentLocation().then(function(coords) {
             console.log(coords);
             var mapsUrl = "http://maps.google.com/maps?z=12&t=m&q=loc:" + coords.latitude + "+" + coords.longitude;
-            self.panicCall(" I'm feeling a very unsafe right now. Please give me a call immediately. If I don't let you know where I am sage in ten minutes, please call the police. I'm at " + mapsUrl);
+            self.panicCall(" It's John Suhr. I'm feeling a very unsafe right now. Please give me a call immediately. If I don't let you know where I am sage in ten minutes, please call the police. I'm at " + mapsUrl);
           });
         },
         panicDegree3: function() {
@@ -24011,7 +24011,7 @@ System.register("build/js/pages/alarm", ["npm:react@0.13.3", "npm:react-router@0
           this.getCurrentLocation().then(function(coords) {
             console.log(coords);
             var mapsUrl = "http://maps.google.com/maps?z=12&t=m&q=loc:" + coords.latitude + "+" + coords.longitude;
-            self.panicCall(" I am in immediate danger. Please call the police immediately and tell them I am at this location." + mapsUrl);
+            self.panicCall(" It's John Suhr. I am in immediate danger. Please call the police immediately and tell them I am at this location." + mapsUrl);
           });
           window.open('tel:999', '_blank');
         },
@@ -24043,6 +24043,7 @@ System.register("build/js/pages/alarm", ["npm:react@0.13.3", "npm:react-router@0
             data: JSON.stringify(data),
             contentType: 'text/plain; charset=utf-8'
           });
+          navigator.notification.alert("Your contact(s) have now been notified!");
         },
         render: function() {
           return (React.createElement("div", {className: "wrapper sos"}, React.createElement("ul", {
@@ -24660,7 +24661,7 @@ System.register("build/js/components/assistanceButton", ["npm:react@0.13.3", "np
               return products['1007']['services']['50010'];
               break;
             case 'healthInsuranceSingleCountry':
-              return products['1008']['services']['50007'];
+              return products['1010'];
               break;
             case 'immediateAssistance':
               return products['1011']['services']['60001'];
@@ -24723,7 +24724,7 @@ System.register("build/js/components/assistanceButton", ["npm:react@0.13.3", "np
         render: function() {
           var divStyle = {width: '100%'};
           if (!this.state.appointmentConfirmation) {
-            var modalContents = React.createElement("div", {className: "scroll"}, React.createElement("h2", null, this.state.assistanceInfo.header), "Allianz can assist you anywhere you are.", React.createElement("h2", null, this.state.assistanceInfo.name), React.createElement("h5", null, "Service details"), React.createElement("span", null, this.state.assistanceInfo.description), React.createElement("h5", null, " Service cost"), "This service costs $", React.createElement("span", null, this.state.assistanceInfo.price), "." + ' ' + "An Allianz service personal will be sent to your location as soon as possible", React.createElement("div", null, React.createElement("button", {
+            var modalContents = React.createElement("div", {className: "scroll"}, React.createElement("h2", null, this.state.assistanceInfo.header), "Allianz can assist you anywhere you are.", React.createElement("h2", null, this.state.assistanceInfo.name), React.createElement("h4", null, "Service details"), React.createElement("span", null, this.state.assistanceInfo.description), React.createElement("h4", null, " Service cost"), "This service costs $", React.createElement("span", null, this.state.assistanceInfo.price), "." + ' ' + "An Allianz service personal will be sent to your location as soon as possible", React.createElement("div", null, React.createElement("button", {
               onClick: this.confirmServiceRequest,
               className: "button button-positive"
             }, "Confirm service request"), React.createElement("button", {
@@ -24731,9 +24732,9 @@ System.register("build/js/components/assistanceButton", ["npm:react@0.13.3", "np
               className: "button"
             }, "Cancel")));
           } else {
-            var modalContents = React.createElement("div", {className: "scroll"}, React.createElement("h2", null, "Success"), "You have an appointment", React.createElement("span", null, ' ' + this.state.appointmentConfirmation.status), "with an Allianz professional on", React.createElement("span", null, ' ' + this.state.appointmentConfirmation.appointmentDate), React.createElement("div", null, React.createElement("button", {
+            var modalContents = React.createElement("div", {className: "scroll"}, React.createElement("h2", null, "Success"), "You have an appointment", React.createElement("span", null, ' ' + this.state.appointmentConfirmation.status + ' '), "with an Allianz professional on", React.createElement("span", null, ' ' + this.state.appointmentConfirmation.appointmentDate + ' '), React.createElement("p", null, " Your appointment will be at latitude ", React.createElement("span", null, ' ' + this.state.appointmentConfirmation.appointmentLatitude + ' '), "and longitude ", React.createElement("span", null, ' ' + this.state.appointmentConfirmation.appointmentLongitude + '.')), React.createElement("img", {src: "build/img/map.png"}), React.createElement("div", null, React.createElement("button", {
               onClick: this.closeModal,
-              className: "button"
+              className: "button align-right"
             }, "Close")));
           }
           return (React.createElement("div", {style: divStyle}, React.createElement("button", {
@@ -24992,7 +24993,7 @@ System.register("build/js/main", ["npm:react@0.13.3", "npm:lodash@3.9.3", "npm:f
           var isHome = this.getPathname() === '/';
           var goSettings = _.partial(this.transitionTo, 'settings');
           return (React.createElement("div", null, React.createElement("div", {className: "bar-dark bar bar-header disable-user-behavior"}, React.createElement("button", {
-            className: "button button-clear",
+            className: "button button-clear backButton",
             onClick: isHome ? goSettings : this.goBack
           }, isHome ? '☰' : '〈 Back'), React.createElement("h1", {className: "title"}, "CoPilot"), React.createElement(AssistanceButton, {
             buttonText: "SOS",
