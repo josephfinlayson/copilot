@@ -13,11 +13,25 @@ export default React.createClass({
             <div>
                 <h1 style={h1Style}>Get medical assistance in one tap!</h1>
 
-                <a className="button button-block health-button button-royal" >Get insurance where you are!</a>
-                <a className="button button-block health-button button-positive">Get immediate assistance!</a>
-                <a className="button button-block health-button button-energized">Get insurance internationally!</a>
+                <AssistanceButton
+                    buttonClasses="button button-block health-button button-royal"
+                    buttonText="Get insurance where you are"
+                    assistanceType="healthInsuranceSingleCountry"
+                />
 
-                <AssistanceButton assistanceType="car" />
+                <AssistanceButton
+                    buttonClasses="button button-block health-button button-positive"
+                    buttonText="Get immediate assistance!"
+                    assistanceType="immediateAssistance"
+                />
+
+                <AssistanceButton
+                    buttonClasses="button button-block health-button button-energized"
+                    buttonText="Get insurance internationally!"
+                    assistanceType="healthInsuranceGlobal"
+                />
+
+                <AssistanceButton buttonClasses="" />
 
             </div>
         )

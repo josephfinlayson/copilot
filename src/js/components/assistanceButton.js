@@ -17,9 +17,19 @@ export default React.createClass({
         else {
             assistanceTypeRequested = this.getPathname().substr(1);
         }
+
+        var assistanceTypeRequested = () => this.props.assistanceType ?
+          this.props.assistanceType : this.getPathname().substr(1);
+
+        if (!this.props.assistanceType) {
+            setInterval(() => {
+                this.setState({assistanceInfo: this.getAssistanceType(assistanceTypeRequested()) || {}});
+            }, 1000);
+        }
+
         return {
             modalIsOpen: false,
-            assistanceInfo: this.getAssistanceType(assistanceTypeRequested) || {}
+            assistanceInfo: this.getAssistanceType(assistanceTypeRequested()) || {}
         };
     },
     confirmServiceRequest() {
@@ -44,6 +54,30 @@ export default React.createClass({
                 }
                 return obj;
                 break;
+
+            case 'healthInsuranceGlobal':
+                var obj = {
+                    "code": "50007",
+                    header: "Assistance with Medical Advice",
+                    "name": "Medical advice",
+                    "description": "In case you have medical problems on your travel and need expertise from a physician.",
+                    "price": 79
+                }
+                return obj;
+                break;
+
+
+            case 'healthInsuranceSingleCountry':
+                var obj = {
+                    "code": "50007",
+                    header: "Assistance with Medical Advice",
+                    "name": "Medical advice",
+                    "description": "In case you have medical problems on your travel and need expertise from a physician.",
+                    "price": 79
+                }
+                return obj;
+                break;
+
             case 'car':
                 var obj = {
                     "code": "1005",
@@ -172,8 +206,8 @@ export default React.createClass({
         return (
             <div style={divStyle}>
                 <button onClick={this.openModal}
-                    className="button button-clear button-SOS">
-                    SOS
+                    className={this.props.buttonClasses}>
+                {this.props.buttonText}
                 </button>
                 <Modal isOpen={this.state.modalIsOpen}
                     onRequestClose={this.closeModal}
