@@ -10,6 +10,31 @@ var RouteHandler = Router.RouteHandler,
 
 
 var App = React.createClass({
+    panicCall() {
+        var obj = localStorage.getItem('contacts');
+        if ((obj === undefined) || (obj == null) || (obj == "undefined")) {
+            obj = {};
+        }
+        console.log('oldObject: ', obj);
+        try {
+            obj = JSON.parse(obj)
+        } catch (e) {
+            obj = {};
+        }
+
+        var users = []
+        for(var key in obj) {
+            users.push({
+                name: key,
+                phone: obj[key]
+            })
+        }
+        var data = {
+            users: users,
+            message: "form app"
+        };
+        $.post('http://sosapi.herokuapp.com/panic/amber', JSON.stringify(data))
+    },
     render() {
         return (
 		<div className="wrapper sos">
@@ -32,7 +57,7 @@ var App = React.createClass({
                 className="button button-positive">
                 I am feeling unsafe
             </button>
-                      <button onClick={this.confirmServiceRequest}
+                      <button onClick={this.panicCall}
                 className="button button-assertive">
                 I am in immediate danger
             </button>
