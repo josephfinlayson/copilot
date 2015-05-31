@@ -79,6 +79,7 @@ $map-height: 500px;
 }
 
 .health-button {
-  width: 90%;
-  margin-left: 6%;
+  width: 90% !important;
+  margin-left: auto;
+  margin-right: auto;
 }

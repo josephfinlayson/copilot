@@ -5,7 +5,7 @@ export default React.createClass({
     render() {
         var h1Style = {
             textAlign: 'center', paddingTop: '40px', margin: '10px',
-            marginLeft: '12%'
+            marginLeft: 'auto', marginRight: 'auto', padding: '10px'
         }
         var buttonStyle = {display: 'block', paddingTop: '40px'}
 
