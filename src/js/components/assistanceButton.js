@@ -17,15 +17,16 @@ export default React.createClass({
         else {
             assistanceTypeRequested = this.getPathname().substr(1);
         }
-        var buttonClasses = "asd";
-        var buttonText = this.props.buttonText;
 
         var assistanceTypeRequested = () => this.props.assistanceType ?
           this.props.assistanceType : this.getPathname().substr(1);
 
-        setInterval(() => {
-          this.setState({assistanceInfo: this.getAssistanceType(assistanceTypeRequested()) || {}});
-        }, 1000);
+        if (!this.props.assistanceType) {
+            setInterval(() => {
+                this.setState({assistanceInfo: this.getAssistanceType(assistanceTypeRequested()) || {}});
+            }, 1000);
+        }
+
         return {
             modalIsOpen: false,
             assistanceInfo: this.getAssistanceType(assistanceTypeRequested()) || {}
