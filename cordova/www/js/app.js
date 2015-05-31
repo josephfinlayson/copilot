@@ -23986,19 +23986,34 @@ System.register("build/js/pages/alarm", ["npm:react@0.13.3", "npm:react-router@0
           var deferred = $.Deferred();
           navigator.geolocation.getCurrentPosition(function(a) {
             console.log(a.coords);
-            hollowResponse.appointmentLatitude = a.coords.latitude;
-            hollowResponse.appointmentLongitude = a.coords.longitude;
-            deferred.resolve(hollowResponse);
+            deferred.resolve(a.coords);
           }, deferred.reject);
           return deferred.promise();
         },
         panicDegree1: function() {
-          this.getCurrentLocation().then(function(hollowResponse) {
-            console.warn(hollowResponse);
+          var self = this;
+          this.getCurrentLocation().then(function(coords) {
+            console.log(coords);
+            var mapsUrl = "http://maps.google.com/maps?z=12&t=m&q=loc:" + coords.latitude + "+" + coords.longitude;
+            self.panicCall(" I'm feeling a bit unsafe right now. Could you give me a call? I'm at " + mapsUrl);
           });
         },
-        panicDegree2: function() {},
-        panicDegree3: function() {},
+        panicDegree2: function() {
+          var self = this;
+          this.getCurrentLocation().then(function(coords) {
+            console.log(coords);
+            var mapsUrl = "http://maps.google.com/maps?z=12&t=m&q=loc:" + coords.latitude + "+" + coords.longitude;
+            self.panicCall(" I'm feeling a very unsafe right now. Please give me a call immediately. If I don't let you know where I am sage in ten minutes, please call the police. I'm at " + mapsUrl);
+          });
+        },
+        panicDegree3: function() {
+          var self = this;
+          this.getCurrentLocation().then(function(coords) {
+            console.log(coords);
+            var mapsUrl = "http://maps.google.com/maps?z=12&t=m&q=loc:" + coords.latitude + "+" + coords.longitude;
+            self.panicCall(" I am in immediate danger. Please call the police immediately and tell them I am at this location." + mapsUrl);
+          });
+        },
         panicCall: function(msg) {
           var obj = localStorage.getItem('contacts');
           if ((obj === undefined) || (obj == null) || (obj == "undefined")) {
@@ -24232,10 +24247,12 @@ System.register("build/js/pages/map", ["npm:react@0.13.3", "github:components/jq
                 deviceLng: position.coords.longitude,
                 deviceLat: position.coords.latitude
               });
+              console.log('Got my location: ', position.coords.longitude, ', ', position.coords.latitude);
               self.getCrimeMap();
             });
           } else {
-            alter("Sorry, Geolocation is not supported by this browser.");
+            console.log('Geolocation is not supported by this browser');
+            alert("Sorry, Geolocation is not supported by this browser.");
           }
         },
         getCrimeMap: function() {
@@ -24369,7 +24386,6 @@ System.register("build/js/components/assistanceButton", ["npm:react@0.13.3", "np
         mixins: [Router.Navigation, Router.State],
         getInitialState: function() {
           var $__0 = this;
-          console.log(this.getAssistanceType(this.getPathname()));
           var assistanceTypeRequested = (function() {
             return $__0.props.assistanceType ? $__0.props.assistanceType : $__0.getPathname().substr(1);
           });
@@ -24394,36 +24410,262 @@ System.register("build/js/components/assistanceButton", ["npm:react@0.13.3", "np
           });
         },
         getAssistanceType: function(type) {
+          var products = {
+            '1001': {
+              "code": "1001",
+              "category": "HOME",
+              "type": "SUBSCRIPTION",
+              "name": "Home emergency assistance and insurance",
+              "description": "We cover the typical mishaps you may encounter: If you lost your keys, a window or door gets broken and many more. Our assistance service is able to dispatch every type of craftsmen at no additional cost & at high quality and guaranteed low cost. 12 month subscription, coverage max. 1,500 per incident.",
+              "price": 119
+            },
+            '1002': {
+              "code": "1002",
+              "category": "HOME",
+              "type": "PAY_PER_USE",
+              "name": "Home craftsmen services",
+              "description": "From our extensive network we can offer you proved, high qualitative craftsmen at a very competitive price. With our Allianz satisfaction guarantee, you can enjoy peace of mind through the whole process.",
+              "price": 0
+            },
+            '1003': {
+              "code": "1003",
+              "category": "SMART_HOME",
+              "type": "SUBSCRIPTION",
+              "name": "Smart Home Assist",
+              "description": "You have a Google Nest, SOMFY or DEUTSCHE TELEKOM Smart Home or similar Smarthome that is able to connect to our Alarm API? We offer a 12 months subscription contract to control any incidents (theft, fire, water) and apply countermeasures.",
+              "price": 129
+            },
+            '1004': {
+              "code": "1004",
+              "category": "ROADSIDE",
+              "type": "SUBSCRIPTION",
+              "name": "Road Side Assistance",
+              "description": "Road side assistance solutions including coverage for towing costs up to 50km and costs connected with (e.g. transportation, hotel stay). 12 month subscription.",
+              "price": 89,
+              "services": {
+                "30006": {
+                  "code": "30006",
+                  "name": "Battery",
+                  "description": "If your battery is down - we change it on spot. Does not include price for battery.",
+                  "price": 0
+                },
+                "30009": {
+                  "code": "30009",
+                  "name": "All-inclusive road side assistance service",
+                  "description": "If it is a smaller damage or you cannot continue your travel and you need to stay in a hotel or an exchange car - we will evaluate with you and do the necessary things.",
+                  "price": 0
+                },
+                "30004": {
+                  "code": "30004",
+                  "name": "Fuel",
+                  "description": "In case being out of fuel, we provide you 5L.",
+                  "price": 39
+                },
+                "30008": {
+                  "code": "30008",
+                  "name": "Flat tire",
+                  "description": "Immediate on-spot repair for your flat tire",
+                  "price": 0
+                }
+              }
+            },
+            '1005': {
+              "code": "1005",
+              "category": "ROADSIDE",
+              "type": "PAY_PER_USE",
+              "name": "Roadside Assistance services",
+              "description": "We tow or repair your vehicle or repair on spot if possible.",
+              "price": 0,
+              "services": {
+                '30010': {
+                  "code": "30010",
+                  "name": "Towing",
+                  "description": "In case of a breakdown or accident and you cannot continue your journey with your car.",
+                  "price": 149
+                },
+                '30005': {
+                  "code": "30005",
+                  "name": "Battery",
+                  "description": "If your battery is down - we change it on spot. Does not include price for battery.",
+                  "price": 49
+                },
+                '30002': {
+                  "code": "30002",
+                  "name": "Fuel",
+                  "description": "In case being out of fuel, we provide you 5L.",
+                  "price": 49
+                },
+                '30007': {
+                  "code": "30007",
+                  "name": "Flat tire",
+                  "description": "Immediate on-spot repair for your flat tire. Price not including exchange tire.",
+                  "price": 59
+                }
+              }
+            },
+            '1006': {
+              "code": "1006",
+              "category": "HOME",
+              "type": "PAY_PER_USE",
+              "name": "Home Care Services",
+              "description": "Everyone needs to care for beloved ones - but can you trust the people helping you? We have a trusted network of elderly or accident home care, child care and pet care services.",
+              "price": 0,
+              "services": {
+                "40001": {
+                  "code": "40001",
+                  "name": "Elderly care",
+                  "description": "1 h visit from our local medical care specialist network.",
+                  "price": 35
+                },
+                "40002": {
+                  "code": "40002",
+                  "name": "Child care",
+                  "description": "1 h visit from our local child care specialist network.",
+                  "price": 25
+                },
+                "40003": {
+                  "code": "40003",
+                  "name": "Pet care",
+                  "description": "1 h visit from our local pet care specialist network.",
+                  "price": 29
+                }
+              }
+            },
+            '1007': {
+              "code": "1007",
+              "category": "TRAVEL",
+              "type": "SUBSCRIPTION",
+              "name": "Single Trip EU Travel Insurance",
+              "description": "1 day travel insurance for one person, including cancellation, medical advice, medical costs, repatriation, personal accident cover. Remark: Add number of days and travelers as multiplicator.",
+              "price": 1.99,
+              "services": {
+                "50010": {
+                  "code": "50010",
+                  "name": "Medical advice",
+                  "description": "In case you have medical problems on your travel and need expertise from a physician.",
+                  "price": 0
+                },
+                "50008": {
+                  "code": "50008",
+                  "name": "Emergency service - non medical",
+                  "description": "_",
+                  "price": 0
+                }
+              }
+            },
+            '1009': {
+              "code": "1009",
+              "category": "TRAVEL",
+              "type": "SUBSCRIPTION",
+              "name": "Annual EU Family Travel Insurance",
+              "description": "Travel insurance, including cancellation, medical advice, medical costs, repatriation, personal accident cover. 12 month subscription. Covers up to 4 persons traveling.",
+              "price": 99
+            },
+            '1008': {
+              "code": "1008",
+              "category": "TRAVEL",
+              "type": "PAY_PER_USE",
+              "name": "Travel emergency assistance",
+              "description": "Get helped in a foreign country, where you need urgent help (for safety, medcial, other reasons).",
+              "price": 0,
+              "services": {
+                "50007": {
+                  "code": "50007",
+                  "name": "Medical advice",
+                  "description": "In case you have medical problems on your travel and need expertise from a physician.",
+                  "price": 79
+                },
+                "50005": {
+                  "code": "50005",
+                  "name": "Translation service",
+                  "description": "Synchronous translation service",
+                  "price": 39
+                },
+                "50004": {
+                  "code": "50004",
+                  "name": "Robbery",
+                  "description": "Help in case of robbery",
+                  "price": 19
+                },
+                "50001": {
+                  "code": "50001",
+                  "name": "Medical help",
+                  "description": "Medical help, hospital search",
+                  "price": 99
+                },
+                "50002": {
+                  "code": "50002",
+                  "name": "Lost in space",
+                  "description": "Need guidance",
+                  "price": 29
+                },
+                "50003": {
+                  "code": "50003",
+                  "name": "Lost baggage",
+                  "description": "Lost baggage advice",
+                  "price": 19
+                },
+                "50006": {
+                  "code": "50006",
+                  "name": "Repatriation organization",
+                  "description": "In case of serious illness, we can organize your repriation back home. Does include 2nd medical opinion check, not include prize for repatriation.",
+                  "price": 59
+                }
+              }
+            },
+            '1010': {
+              "code": "1010",
+              "category": "HEALTH",
+              "type": "SUBSCRIPTION",
+              "name": "International Health Insurance",
+              "description": "With our international health insurance you are insured when staying for a longer time abroad, e.g. for business reasons. 12 months subscription. Note: This is no travel insurance. Coverage ex. U.S.",
+              "price": 5000,
+              "services": {}
+            },
+            '1011': {
+              "code": "1011",
+              "category": "HEALTH",
+              "type": "PAY_PER_USE",
+              "name": "Medical advice",
+              "description": "You just got a diagnosis by your general practitioner and want to get this checked by medical professionals.",
+              "price": 0,
+              "services": {"60001": {
+                  "code": "60001",
+                  "name": "Medical advice",
+                  "description": "Get immediate medical help on the phone.",
+                  "price": 79
+                }}
+            },
+            '1013': {
+              "code": "1013",
+              "category": "HEALTH",
+              "type": "PAY_PER_USE",
+              "name": "Health Coaching",
+              "description": "You want to live healthier but you don't know how? You want to reduce weight and change your nutrition? Here is an easy way to get coached by medical professionals during a 12weeks period.",
+              "price": 0,
+              "services": {"70001": {
+                  "code": "70001",
+                  "name": "Cardio Health Coaching",
+                  "description": "You want to live healthier but you don't know how? You want to reduce weight and change your nutrition? Here is an easy way to get coached by medical professionals during a 12 weeks period.",
+                  "price": 199
+                }}
+            }
+          };
           switch (type) {
             case 'health':
-              var obj = {
-                "code": "50007",
-                header: "Assistance with Medical Advice",
-                "name": "Medical advice",
-                "description": "In case you have medical problems on your travel and need expertise from a physician.",
-                "price": 79
-              };
-              return obj;
+              return products['1011']['services']['60001'];
               break;
             case 'healthInsuranceGlobal':
-              var obj = {
-                "code": "50007",
-                header: "Assistance with Medical Advice",
-                "name": "Medical advice",
-                "description": "In case you have medical problems on your travel and need expertise from a physician.",
-                "price": 79
-              };
-              return obj;
+              return products['1007']['services']['50010'];
               break;
             case 'healthInsuranceSingleCountry':
-              var obj = {
-                "code": "50007",
-                header: "Assistance with Medical Advice",
-                "name": "Medical advice",
-                "description": "In case you have medical problems on your travel and need expertise from a physician.",
-                "price": 79
-              };
-              return obj;
+              return products['1008']['services']['50007'];
+              break;
+            case 'immediateAssistance':
+              return products['1011']['services']['60001'];
+              break;
+            case 'guardian':
+              return products['1008'];
               break;
             case 'car':
               var obj = {
@@ -24439,27 +24681,9 @@ System.register("build/js/components/assistanceButton", ["npm:react@0.13.3", "np
             case 'crime':
               break;
             case 'map':
-              var obj = {
-                "code": "50004",
-                "name": "Robbery",
-                "description": "Help in case of robbery",
-                "price": 19
-              };
-              return obj;
-              break;
-            case 'crimeMap':
-              var obj = {
-                "code": "1007",
-                "category": "TRAVEL",
-                "type": "SUBSCRIPTION",
-                "name": "Single Trip EU Travel Insurance",
-                "description": "1 day travel insurance for one person, including cancellation, medical advice, medical costs, repatriation, personal accident cover. Remark: Add number of days and travelers as multiplicator.",
-                "price": 1.99
-              };
-              return obj;
+              return products['1008'];
               break;
             default:
-              console.log(this.state);
               break;
           }
         },
@@ -24489,16 +24713,16 @@ System.register("build/js/components/assistanceButton", ["npm:react@0.13.3", "np
           return deferred.promise();
         },
         closeModal: function() {
+          this.setState({appointmentConfirmation: false});
           this.setState({modalIsOpen: false});
         },
         openModal: function() {
           this.setState({modalIsOpen: true});
         },
         render: function() {
-          console.log(this.state.appointmentConfirmation);
           var divStyle = {width: '100%'};
           if (!this.state.appointmentConfirmation) {
-            var modalContents = React.createElement("div", {className: "scroll"}, React.createElement("h2", null, this.state.assistanceInfo.header), "Allianz can assist you anywhere you are.", React.createElement("h5", null, "Service details"), React.createElement("span", null, this.state.assistanceInfo.description), React.createElement("h5", null, " Service cost"), "This service costs $", React.createElement("span", null, this.state.assistanceInfo.price), "." + ' ' + "An Allianz service personal will be sent to your location as soon as possible", React.createElement("div", null, React.createElement("button", {
+            var modalContents = React.createElement("div", {className: "scroll"}, React.createElement("h2", null, this.state.assistanceInfo.header), "Allianz can assist you anywhere you are.", React.createElement("h2", null, this.state.assistanceInfo.name), React.createElement("h5", null, "Service details"), React.createElement("span", null, this.state.assistanceInfo.description), React.createElement("h5", null, " Service cost"), "This service costs $", React.createElement("span", null, this.state.assistanceInfo.price), "." + ' ' + "An Allianz service personal will be sent to your location as soon as possible", React.createElement("div", null, React.createElement("button", {
               onClick: this.confirmServiceRequest,
               className: "button button-positive"
             }, "Confirm service request"), React.createElement("button", {
@@ -24768,7 +24992,6 @@ System.register("build/js/main", ["npm:react@0.13.3", "npm:lodash@3.9.3", "npm:f
             className: "button button-clear",
             onClick: isHome ? goSettings : this.goBack
           }, isHome ? '☰' : '〈 Back'), React.createElement("h1", {className: "title"}, "CoPilot"), React.createElement(AssistanceButton, {
-            assistanceType: "health",
             buttonText: "SOS",
             buttonClasses: "button button-clear button-SOS"
           })), React.createElement("div", {className: "scroll-content ionic-scroll"}, React.createElement("div", {className: "scroll"}, React.createElement(RouteHandler, null)))));
