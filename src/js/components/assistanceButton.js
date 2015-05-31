@@ -1,16 +1,19 @@
 //window.allianzAPIKey = "ffd4dedb-69b8-429a-8122-83c52edb632a";
 window.allianzAPIKey = "test-apiKey-1"
 import React from 'react';
+import Router from 'react-router';
+
 import Modal from 'react-modal';
 import $ from 'jquery';
 
 export default React.createClass({
+    mixins: [Router.Navigation, Router.State],
     getInitialState() {
-        console.log(this.getAssistanceType(this.props.assistanceType));
+        console.log(this.getAssistanceType(this.getPathname()));
         return {
-            modelIsOpen: false,
-            assistanceInfo: this.getAssistanceType(this.props.assistanceType) || {}
-        }
+            modalIsOpen: false,
+            assistanceInfo: this.getAssistanceType(this.getPathname()) || {}
+        };
     },
     confirmServiceRequest() {
         var self = this;
@@ -48,6 +51,9 @@ export default React.createClass({
                 break;
 
             case 'crime':
+                break;
+            case 'map':
+
                 var obj = {
                     "code": "50004",
                     "name": "Robbery",
@@ -59,7 +65,7 @@ export default React.createClass({
                 return obj;
                 break;
             case 'crimeMap':
-            var obj =   {
+                var obj = {
                     "code": "1007",
                     "category": "TRAVEL",
                     "type": "SUBSCRIPTION",
@@ -113,6 +119,10 @@ export default React.createClass({
     },
     render() {
         console.log(this.state.appointmentConfirmation);
+        var divStyle = {
+            width: '100%'
+        };
+
         if (!this.state.appointmentConfirmation) {
             var modalContents = <div className="scroll">
                 <h2>{this.state.assistanceInfo.header}</h2>
@@ -139,24 +149,24 @@ export default React.createClass({
             </div>;
         } else {
             var modalContents = <div className="scroll">
-                    <h2>Success</h2>
-                    You have an appointment
-                        <span>{' ' + this.state.appointmentConfirmation.status}</span>
-                    with an Allianz professional on
-                    <span>{' ' + this.state.appointmentConfirmation.appointmentDate}</span>
+                <h2>Success</h2>
+                You have an appointment
+                <span>{' ' + this.state.appointmentConfirmation.status}</span>
+                with an Allianz professional on
+                <span>{' ' + this.state.appointmentConfirmation.appointmentDate}</span>
                 <div>
-                <button onClick={this.closeModal}
+                    <button onClick={this.closeModal}
                         className="button">
                         Close
                     </button>
-                    </div>
                 </div>
+            </div>
         }
         return (
-            <div>
+            <div style={divStyle}>
                 <button onClick={this.openModal}
-                    className="button button-assertive">
-                        {this.props.assistanceType}
+                    className="button button-clear button-SOS">
+                    SOS
                 </button>
                 <Modal isOpen={this.state.modalIsOpen}
                     onRequestClose={this.closeModal}

@@ -10,11 +10,12 @@ import attachFastClick from 'fastclick';
 import homePage from './pages/home';
 import settingsPage from './pages/settings';
 import crimeMapper from './pages/map';
-import crimeAlarm from './pages/alarm';
+import guardian from './pages/alarm';
 import health from './pages/health';
-import SOS from './pages/alarm';
+import SOS from './pages/SOS';
 import addContacts from './pages/addContacts';
 import phoneContacts from './pages/phoneContacts';
+import AssistanceButton from './components/assistanceButton';
 
 //router
 import Router from 'react-router';
@@ -48,8 +49,7 @@ var App = React.createClass({
 
             <h1 className="title">CoPilot</h1>
 
-            <button className="button button-clear button-SOS"
-                    onClick={_.partial(this.transitionTo, 'settings')}>SOS</button>
+            <AssistanceButton assistanceType="health" />
           </div>
           <div className="scroll-content ionic-scroll">
             <div className="scroll">
@@ -66,7 +66,7 @@ var routes = (
     <DefaultRoute handler={homePage} />
     <Route name="about" handler={settingsPage} />
     <Route path="map" name="crimeMapper" handler={crimeMapper} />
-    <Route name="crimeAlarm" handler={crimeAlarm} />
+    <Route name="guardian" handler={guardian} />
     <Route name="health" path="health" handler={health} />
     <Route name="SOS" path="sos" handler={SOS} />
     <Route name="addContacts" path="/sos/addContacts" handler={addContacts} />
