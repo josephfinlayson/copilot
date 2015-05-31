@@ -49,10 +49,8 @@ var App = React.createClass({
 
             <h1 className="title">CoPilot</h1>
 
-            <AssistanceButton assistanceType="health"
-            buttonText="SOS"
-                buttonClasses="button button-clear button-SOS"
-            />
+            <AssistanceButton buttonText="SOS" buttonClasses="button button-clear button-SOS" />
+
           </div>
           <div className="scroll-content ionic-scroll">
             <div className="scroll">

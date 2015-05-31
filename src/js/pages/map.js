@@ -33,10 +33,12 @@ var App = React.createClass({
 					deviceLng: position.coords.longitude,
 					deviceLat: position.coords.latitude
 				});
+				console.log('Got my location: ', position.coords.longitude, ', ', position.coords.latitude );
 				self.getCrimeMap();
 			});
 		} else {
-			alter("Sorry, Geolocation is not supported by this browser.");
+			console.log('Geolocation is not supported by this browser');
+			alert("Sorry, Geolocation is not supported by this browser.");
 		}
 	},
 
