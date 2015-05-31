@@ -24048,7 +24048,7 @@ System.register("build/js/pages/alarm", ["npm:react@0.13.3", "npm:react-router@0
           return (React.createElement("div", {className: "wrapper sos"}, React.createElement("ul", {
             "data-role": "listview",
             "data-inset": "true",
-            className: "ui-listview ui-listview-inset ui-corner-all ui-shadow"
+            className: "ui-listview ui-listview-inset ui-corner-all ui-shadow new-contact"
           }, React.createElement(Link, {to: "/sos/addContacts"}, React.createElement("li", {
             "data-icon": "plus",
             className: "ui-first-child"
