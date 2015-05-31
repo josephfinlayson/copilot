@@ -3,6 +3,7 @@
  */
 import React from 'react';
 import Router from 'react-router';
+import $ from 'jquery';
 
 var RouteHandler = Router.RouteHandler,
     Link = Router.Link;
@@ -22,9 +23,24 @@ var App = React.createClass({
                 </li>
             </Link>
             </ul>
-
-			<RouteHandler />
+            <button onClick={this.confirmServiceRequest}
+                className="button button-energized">
+                I need assistance from friends  
+                
+            </button>
+                      <button onClick={this.confirmServiceRequest}
+                className="button button-positive">
+                I am feeling unsafe
+            </button>
+                      <button onClick={this.confirmServiceRequest}
+                className="button button-assertive">
+                I am in immediate danger
+            </button>
         </div>
+
+            
+
+   
         )
     }
 });

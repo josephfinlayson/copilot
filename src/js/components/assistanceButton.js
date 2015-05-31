@@ -19,11 +19,23 @@ export default React.createClass({
         }
         var buttonClasses = "asd";
         var buttonText = this.props.buttonText;
+
+        var assistanceTypeRequested = () => this.props.assistanceType ?
+          this.props.assistanceType : this.getPathname().substr(1);
+        // if (this.props.assistanceType){
+        //     assistanceTypeRequested = this.props.assistanceType;
+        // }
+        // else {
+        //     assistanceTypeRequested = this.getPathname().substr(1);
+        // }
+        setInterval(() => {
+          this.setState({assistanceInfo: this.getAssistanceType(assistanceTypeRequested()) || {}});
+        }, 1000);
         return {
             text: buttonText,
             classes:buttonClasses,
             modalIsOpen: false,
-            assistanceInfo: this.getAssistanceType(assistanceTypeRequested) || {}
+            assistanceInfo: this.getAssistanceType(assistanceTypeRequested()) || {}
         };
     },
     confirmServiceRequest() {
