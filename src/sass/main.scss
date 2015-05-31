@@ -4,8 +4,8 @@
 @import "health";
 
 #sos {
-  @import "../../bower_components/bootstrap/dist/css/bootstrap.css";
-  @import "../../bower_components/jquery-mobile/css/themes/default/jquery.mobile.css";
+  @import "../../bower_components/bootstrap/dist/css/bootstrap";
+  @import "https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.css";
 }
 .wrapper
 {
