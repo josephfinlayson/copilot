@@ -41,7 +41,7 @@ var App = React.createClass({
       return (
         <div>
           <div className="bar-dark bar bar-header disable-user-behavior">
-            <button className="button button-clear" onClick={
+            <button className="button button-clear backButton" onClick={
               isHome ? goSettings : this.goBack
             }>{
               isHome ? '☰' : '〈 Back'

@@ -30,7 +30,7 @@ var App = React.createClass({
             .then(function (coords) {
                 console.log(coords)
                 var mapsUrl = "http://maps.google.com/maps?z=12&t=m&q=loc:" + coords.latitude + "+" + coords.longitude;
-                self.panicCall(" I'm feeling a bit unsafe right now. Could you give me a call? I'm at " + mapsUrl)
+                self.panicCall(" It's John Suhr. I'm feeling a bit unsafe right now. Could you give me a call? I'm at " + mapsUrl)
             })
         // this.panicCall(" I'm feeling a bit unsafe right now. Could you give me a call? I'm at ")
     },
@@ -40,7 +40,7 @@ var App = React.createClass({
             .then(function (coords) {
                 console.log(coords)
                 var mapsUrl = "http://maps.google.com/maps?z=12&t=m&q=loc:" + coords.latitude + "+" + coords.longitude;
-                self.panicCall(" I'm feeling a very unsafe right now. Please give me a call immediately. If I don't let you know where I am sage in ten minutes, please call the police. I'm at " + mapsUrl)
+                self.panicCall(" It's John Suhr. I'm feeling a very unsafe right now. Please give me a call immediately. If I don't let you know where I am sage in ten minutes, please call the police. I'm at " + mapsUrl)
             })
         // this.panicCall(" I'm feeling a very unsafe right now. Please give me a call immediately. If I don't let you know where I am sage in ten minutes, please call the police. I'm at")
     },
@@ -50,7 +50,7 @@ var App = React.createClass({
             .then(function (coords) {
                 console.log(coords)
                 var mapsUrl = "http://maps.google.com/maps?z=12&t=m&q=loc:" + coords.latitude + "+" + coords.longitude;
-                self.panicCall(" I am in immediate danger. Please call the police immediately and tell them I am at this location." + mapsUrl)
+                self.panicCall(" It's John Suhr. I am in immediate danger. Please call the police immediately and tell them I am at this location." + mapsUrl)
             })
 
         window.open('tel:999','_blank');

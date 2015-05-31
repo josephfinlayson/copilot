@@ -1,0 +1,10 @@
+.list {
+  padding: 1em;
+  p {
+    font-size: 1.5em;
+    line-height: 1.2;
+  }
+  label + label {
+    margin-top: 0.5em;
+  }
+}
