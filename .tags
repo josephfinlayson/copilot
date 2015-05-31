@@ -1,0 +1,40 @@
+gulp	/Users/ben/Dev/Git/copilot/gulpfile.js	/^var gulp = require('gulp');$/;"	variable	line:3
+plugins	/Users/ben/Dev/Git/copilot/gulpfile.js	/^var plugins = require('gulp-load-plugins')();$/;"	variable	line:4
+rimraf	/Users/ben/Dev/Git/copilot/gulpfile.js	/^var rimraf = require('rimraf');$/;"	variable	line:5
+browserSync	/Users/ben/Dev/Git/copilot/gulpfile.js	/^var browserSync = require('browser-sync');$/;"	variable	line:6
+runSequence	/Users/ben/Dev/Git/copilot/gulpfile.js	/^var runSequence = require('run-sequence');$/;"	variable	line:7
+onError	/Users/ben/Dev/Git/copilot/gulpfile.js	/^var onError = function (err) {$/;"	function	line:9
+onError	/Users/ben/Dev/Git/copilot/gulpfile.js	/^var onError = function (err) {$/;"	function	line:9
+rimraf	/Users/ben/Dev/Git/copilot/gulpfile.js	/^  rimraf('.\/build', function(err) {$/;"	function	line:100
+rimraf	/Users/ben/Dev/Git/copilot/gulpfile.js	/^  rimraf('.\/dist', function(err) {$/;"	function	line:116
+render	/Users/ben/Dev/Git/copilot/src/js/main.js	/^    render() {$/;"	function	line:22
+Route	/Users/ben/Dev/Git/copilot/src/js/main.js	/^var Route = Router.Route,$/;"	variable	line:15
+tap	/Users/ben/Dev/Git/copilot/src/js/pages/home.js	/^  tap(event) {$/;"	function	line:9
+render	/Users/ben/Dev/Git/copilot/src/js/pages/home.js	/^  render() {$/;"	function	line:16
+Minis	/Users/ben/Dev/Git/copilot/src/js/pages/home.js	/^var Minis = React.createClass({$/;"	variable	line:8
+render	/Users/ben/Dev/Git/copilot/src/js/pages/home.js	/^  render() {$/;"	function	line:32
+App	/Users/ben/Dev/Git/copilot/src/js/pages/home.js	/^var App = React.createClass({$/;"	variable	line:31
+html	/Users/ben/Dev/Git/copilot/index.html	/^<html>$/;"	function	line:2
+head	/Users/ben/Dev/Git/copilot/index.html	/^<head lang="en">$/;"	function	line:3
+meta	/Users/ben/Dev/Git/copilot/index.html	/^  <meta charset="UTF-8">$/;"	function	line:4
+meta	/Users/ben/Dev/Git/copilot/index.html	/^  <meta name="viewport" content="width=device-width, initial-scale=1">$/;"	function	line:5
+title	/Users/ben/Dev/Git/copilot/index.html	/^  <title>COPILOT<\/title>$/;"	function	line:6
+link	/Users/ben/Dev/Git/copilot/index.html	/^  <link rel="stylesheet" href="build\/css\/main.css"\/>$/;"	function	line:7
+link	/Users/ben/Dev/Git/copilot/index.html	/^  <link rel="stylesheet" href="http:\/\/code.ionicframework.com\/ionicons\/2.0.1\/css\/ionicons.min.css">$/;"	function	line:9
+body	/Users/ben/Dev/Git/copilot/index.html	/^<body class = "grade-a platform-browser platform-linux platform-ready">$/;"	function	line:11
+div	/Users/ben/Dev/Git/copilot/index.html	/^<div id="app">$/;"	function	line:13
+script	/Users/ben/Dev/Git/copilot/index.html	/^<script type="text\/javascript" src="cordova.js"><\/script>$/;"	function	line:19
+script	/Users/ben/Dev/Git/copilot/index.html	/^<script type="text\/javascript" src="js\/app.js"><\/script>$/;"	function	line:20
+script	/Users/ben/Dev/Git/copilot/index.html	/^<script src="jspm_packages\/system.js"><\/script>$/;"	function	line:23
+script	/Users/ben/Dev/Git/copilot/index.html	/^<script src="config.js"><\/script>$/;"	function	line:24
+script	/Users/ben/Dev/Git/copilot/index.html	/^<script>if (typeof cordova === 'undefined') {$/;"	function	line:25
+getInitialState	/Users/ben/Dev/Git/copilot/src/js/pages/map.js	/^	getInitialState() {$/;"	function	line:10
+getLocationAndMap	/Users/ben/Dev/Git/copilot/src/js/pages/map.js	/^	getLocationAndMap() {$/;"	function	line:26
+getCrimeMap	/Users/ben/Dev/Git/copilot/src/js/pages/map.js	/^	getCrimeMap() {$/;"	function	line:45
+onDeviceReady	/Users/ben/Dev/Git/copilot/src/js/pages/map.js	/^						function onDeviceReady () {$/;"	function	line:82
+onMapsApiLoaded	/Users/ben/Dev/Git/copilot/src/js/pages/map.js	/^						global.onMapsApiLoaded = function () {$/;"	function	line:86
+render	/Users/ben/Dev/Git/copilot/src/js/pages/map.js	/^	render() {$/;"	function	line:211
+componentDidMount	/Users/ben/Dev/Git/copilot/src/js/pages/map.js	/^	componentDidMount() {$/;"	function	line:228
+getDistanceFromLatLonInKm	/Users/ben/Dev/Git/copilot/src/js/pages/map.js	/^	getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {$/;"	function	line:234
+deg2rad	/Users/ben/Dev/Git/copilot/src/js/pages/map.js	/^	deg2rad(deg) {$/;"	function	line:248
+App	/Users/ben/Dev/Git/copilot/src/js/pages/map.js	/^var App = React.createClass({$/;"	variable	line:8

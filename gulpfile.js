@@ -25,7 +25,10 @@ gulp.task('browser-sync', function() {
   browserSync.init([
     './build/css/*.css',
     './build/js/**/*.js',
-    './**/*.html'
+    './**/*.html',
+    '!node_modules/**',
+    '!jspm_packages/**'
+
   ],
   {
     notify: false,

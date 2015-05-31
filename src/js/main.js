@@ -41,7 +41,7 @@ var App = React.createClass({
       return (
         <div>
           <div className="bar-dark bar bar-header disable-user-behavior">
-            <button className="button button-clear" onClick={
+            <button className="button button-clear backButton" onClick={
               isHome ? goSettings : this.goBack
             }>{
               isHome ? '☰' : '〈 Back'
@@ -81,6 +81,16 @@ var routes = (
 
 React.initializeTouchEvents(true)
 
-Router.run(routes, function (Handler) {
-    React.render(<Handler />, document.querySelector('#app'));
-});
+
+if (typeof cordova !== 'undefined') {
+  document.addEventListener('deviceready', function(e) {
+    Router.run(routes, function (Handler) {
+        React.render(<Handler />, document.querySelector('#app'));
+  });
+  });
+} else {
+
+    Router.run(routes, function (Handler) {
+        React.render(<Handler />, document.querySelector('#app'));
+  });
+}

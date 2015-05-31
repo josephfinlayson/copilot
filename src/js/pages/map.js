@@ -74,108 +74,135 @@ var App = React.createClass({
 			if (this.isMounted()) {
 				var map;
 				if (!self.state.map) {
-					var mapProp = {
-						center:new google.maps.LatLng(this.state.lat,this.state.lng),
-						zoom: this.state.mapZoom,
-						mapTypeId:google.maps.MapTypeId.ROADMAP
-					};
-					map=new google.maps.Map(document.getElementById("googleMap"),mapProp);
-					self.setState({
-						map: map
-					});
+					var mapProp, devicePosition, marker;
 
-					var devicePosition = new google.maps.LatLng(self.state.deviceLat, self.state.deviceLng);
-					var marker=new google.maps.Marker({
-						position: devicePosition,
-					});
-					marker.setMap(map);
+					(function (global) {
+						"use strict";
 
-				}
-				else {
-					map = self.state.map;
-				}
-
-				var list = [];
-
-				result.forEach(function(item) {
-					var lat = item.location.latitude;
-					var lng = item.location.longitude;
-					list.push(new google.maps.LatLng(lat, lng));
-				});
-				var pointArray = new google.maps.MVCArray(list);
-				var center = new google.maps.LatLng(self.state.lat,self.state.lng);
-				if (self.state.heatmap) {
-					// console.log('removing old heatmap.');
-					self.state.heatmap.setMap(null);
-				}
-				var heatmap = new google.maps.visualization.HeatmapLayer({
-					center: center,
-					data: pointArray,
-					radius: self.state.heatmapRadius
-				});
-				// console.log('drawing new heatmap: ');
-				self.setState({heatmap: heatmap});
-				heatmap.setMap(map);
-				heatmap.set('gradient', heatmapGradient);
-
-				var debouncedCrimeMap = _.debounce(self.getCrimeMap, 500);
-
-				if (!self.state.mapDragListener) {
-					self.setState({
-						mapDragListener:true
-					});
-					google.maps.event.addListener(self.state.map, 'dragend', function() {
-						// console.log('Center Changed');
-						var map = self.state.map;
-						var c = map.getCenter();
-						var newLat = c.lat();
-						var newLng = c.lng();
-						// console.log(newLat, newLng);
-						var dist = self.getDistanceFromLatLonInKm(self.state.lat, self.state.lng, newLat, newLng);
-						// console.log(dist);
-						if (dist > 0.5) {
-
-							// var currentPosition = new google.maps.LatLng(newLat, newLng);
-							// var marker=new google.maps.Marker({
-							// 	position: currentPosition,
-							// });
-							// marker.setMap(map);
-
-							self.setState({
-								lng: newLng,
-								lat: newLat
-							});
-							debouncedCrimeMap();
+						function onDeviceReady () {
+								$.getScript('https://maps.googleapis.com/maps/api/js?libraries=visualization&callback=onMapsApiLoaded');
 						}
-					});
-				}
 
-				if (!self.state.mapZoomListener) {
-					self.setState({
-						mapZoomListener:true
-					});
-					google.maps.event.addListener(self.state.map, 'zoom_changed', function() {
-						var map = self.state.map;
-						var newZoom = map.getZoom();
-						// console.log('zoom: ', newZoom);
-						self.setState({
-							mapZoom: newZoom
-						});
-						heatmap.set('radius', parseInt(newZoom * 1));
-						// if (newZoom > 20) {
-						// 	heatmap.set('radius', 20);
-						// }
-						// else if (newZoom <= 15 ) {
-						// 	heatmap.set('radius', 15);
-						// }
-						// else if (newZoom <= 10) {
-						// 	heatmap.set('radius', 10);
-						// }
-						// else {
-						// 	heatmap.set('radius', 5);
-						// }
-						// console.log('Zoom Changed:', newZoom);
-					});
+						global.onMapsApiLoaded = function () {
+								// Maps API loaded and ready to be used.
+								// var map = new google.maps.Map(document.getElementById("googleMap"), {});
+								// self.setState(map, map)
+								mapProp = {
+									center:new google.maps.LatLng(self.state.lat,self.state.lng),
+									zoom: self.state.mapZoom,
+									mapTypeId:google.maps.MapTypeId.ROADMAP
+								};
+								map=new google.maps.Map(document.getElementById("googleMap"),mapProp);
+								console.log("asdasd");
+								self.setState({
+									map: map
+								});
+
+								devicePosition = new google.maps.LatLng(self.state.deviceLat, self.state.deviceLng);
+
+								marker=new google.maps.Marker({
+									position: devicePosition,
+								});
+								marker.setMap(map);
+
+
+												var list = [];
+
+												result.forEach(function(item) {
+													var lat = item.location.latitude;
+													var lng = item.location.longitude;
+													list.push(new google.maps.LatLng(lat, lng));
+												});
+												var pointArray = new google.maps.MVCArray(list);
+												var center = new google.maps.LatLng(self.state.lat,self.state.lng);
+												if (self.state.heatmap) {
+													// console.log('removing old heatmap.');
+													self.state.heatmap.setMap(null);
+												}
+												var heatmap = new google.maps.visualization.HeatmapLayer({
+													center: center,
+													data: pointArray,
+													radius: self.state.heatmapRadius
+												});
+												// console.log('drawing new heatmap: ');
+												self.setState({heatmap: heatmap});
+												heatmap.setMap(map);
+												heatmap.set('gradient', heatmapGradient);
+
+												var debouncedCrimeMap = _.debounce(self.getCrimeMap, 500);
+
+												if (!self.state.mapDragListener) {
+													self.setState({
+														mapDragListener:true
+													});
+													google.maps.event.addListener(self.state.map, 'dragend', function() {
+														// console.log('Center Changed');
+														var map = self.state.map;
+														var c = map.getCenter();
+														var newLat = c.lat();
+														var newLng = c.lng();
+														// console.log(newLat, newLng);
+														var dist = self.getDistanceFromLatLonInKm(self.state.lat, self.state.lng, newLat, newLng);
+														// console.log(dist);
+														if (dist > 0.5) {
+
+															// var currentPosition = new google.maps.LatLng(newLat, newLng);
+															// var marker=new google.maps.Marker({
+															// 	position: currentPosition,
+															// });
+															// marker.setMap(map);
+
+															self.setState({
+																lng: newLng,
+																lat: newLat
+															});
+															debouncedCrimeMap();
+														}
+													});
+												}
+
+												if (!self.state.mapZoomListener) {
+													self.setState({
+														mapZoomListener:true
+													});
+													google.maps.event.addListener(self.state.map, 'zoom_changed', function() {
+														var map = self.state.map;
+														var newZoom = map.getZoom();
+														// console.log('zoom: ', newZoom);
+														self.setState({
+															mapZoom: newZoom
+														});
+														heatmap.set('radius', parseInt(newZoom * 1));
+														// if (newZoom > 20) {
+														// 	heatmap.set('radius', 20);
+														// }
+														// else if (newZoom <= 15 ) {
+														// 	heatmap.set('radius', 15);
+														// }
+														// else if (newZoom <= 10) {
+														// 	heatmap.set('radius', 10);
+														// }
+														// else {
+														// 	heatmap.set('radius', 5);
+														// }
+														// console.log('Zoom Changed:', newZoom);
+													});
+												}
+
+						};
+						console.log(cordova);
+						if (typeof cordova !== 'undefined') {
+							document.addEventListener("deviceready", onDeviceReady, false);
+							onDeviceReady();
+						} else {
+							onDeviceReady();
+						}
+
+					})(window);
+
+
+				} else {
+					map = self.state.map;
 				}
 			}
 		}.bind(this));
@@ -223,5 +250,6 @@ var App = React.createClass({
 	}
 
 });
+
 
 export default App;

@@ -1,7 +1,6 @@
 @import "../../bower_components/pure/pure.css";
 @import "../../bower_components/ionic/scss/ionic";
-@import "home";
-@import "health";
+@import "home", "health", "user";
 
 #sos {
   @import "../../bower_components/bootstrap/dist/css/bootstrap.css";
@@ -81,4 +80,9 @@ $map-height: 500px;
 .health-button {
   width: 90%;
   margin-left: 6%;
+}
+
+.backButton {
+  text-align: left;
+  width: 5em;
 }
