@@ -1,21 +1,34 @@
 //window.allianzAPIKey = "ffd4dedb-69b8-429a-8122-83c52edb632a";
-window.allianzAPIKey ="test-apiKey-1"
+window.allianzAPIKey = "test-apiKey-1"
 import React from 'react';
+import Router from 'react-router';
+
 import Modal from 'react-modal';
 import $ from 'jquery';
 
 export default React.createClass({
+    mixins: [Router.Navigation, Router.State],
     getInitialState() {
-        console.log(this.getAssistanceType(this.props.assistanceType));
-        return {
-            modelIsOpen: false,
-            assistanceInfo: this.getAssistanceType(this.props.assistanceType) || {}
+        console.log(this.getAssistanceType(this.getPathname()));
+        var assistanceTypeRequested;
+        if (this.props.assistanceType){
+            assistanceTypeRequested = this.props.assistanceType;
         }
+        else {
+            assistanceTypeRequested = this.getPathname().substr(1);
+        }
+        return {
+            modalIsOpen: false,
+            assistanceInfo: this.getAssistanceType(assistanceTypeRequested) || {}
+        };
     },
     confirmServiceRequest() {
+        var self = this;
         let postInfo = this.getServiceRequestDetails();
-
-        $.when($.post('https://aai-api.com/api/serviceOrders?apiKey=' + window.allianzAPIKey, postInfo)).then(function (data) {
+        postInfo.then(function (fulfilledPost) {
+            return $.when($.post('https://aai-api.com/api/serviceOrders?apiKey=' + window.allianzAPIKey, fulfilledPost))
+        }).then(function (data) {
+            self.setState({'appointmentConfirmation': data})
             console.log(data);
         })
     },
@@ -45,6 +58,8 @@ export default React.createClass({
                 break;
 
             case 'crime':
+                break;
+            case 'map':
 
                 var obj = {
                     "code": "50004",
@@ -53,9 +68,20 @@ export default React.createClass({
                     "price": 19
                 }
 
+
                 return obj;
                 break;
-
+            case 'crimeMap':
+                var obj = {
+                    "code": "1007",
+                    "category": "TRAVEL",
+                    "type": "SUBSCRIPTION",
+                    "name": "Single Trip EU Travel Insurance",
+                    "description": "1 day travel insurance for one person, including cancellation, medical advice, medical costs, repatriation, personal accident cover. Remark: Add number of days and travelers as multiplicator.",
+                    "price": 1.99
+                }
+                return obj;
+                break;
             default:
                 console.log(this.state);
                 break;
@@ -77,7 +103,18 @@ export default React.createClass({
             "creditCardValidUntilMonth": 2,
             "creditCardValidUntilYear": 2020
         }
-        return hollowResponse
+        var deferred = $.Deferred();
+
+        navigator.geolocation.getCurrentPosition(
+            function (a) {
+                console.log(a.coords)
+                hollowResponse.appointmentLatitude = a.coords.latitude;
+                hollowResponse.appointmentLongitude = a.coords.longitude;
+                deferred.resolve(hollowResponse);
+            },
+            deferred.reject)
+
+        return deferred.promise();
 
     },
     closeModal() {
@@ -88,40 +125,61 @@ export default React.createClass({
         this.setState({modalIsOpen: true});
     },
     render() {
+        console.log(this.state.appointmentConfirmation);
+        var divStyle = {
+            width: '100%'
+        };
 
+        if (!this.state.appointmentConfirmation) {
+            var modalContents = <div className="scroll">
+                <h2>{this.state.assistanceInfo.header}</h2>
+                Allianz can assist you anywhere you are.
+                <h5>Service details</h5>
+                <span>
+                            {this.state.assistanceInfo.description}
+                </span>
+                <h5> Service cost</h5>
+                This service costs $
+                <span>{this.state.assistanceInfo.price}</span>
+                .
+                An Allianz service personal will be sent to your location as soon as possible
+                <div>
+                    <button onClick={this.confirmServiceRequest}
+                        className="button button-positive">
+                        Confirm service request
+                    </button>
+                    <button onClick={this.closeModal}
+                        className="button">
+                        Cancel
+                    </button>
+                </div>
+            </div>;
+        } else {
+            var modalContents = <div className="scroll">
+                <h2>Success</h2>
+                You have an appointment
+                <span>{' ' + this.state.appointmentConfirmation.status}</span>
+                with an Allianz professional on
+                <span>{' ' + this.state.appointmentConfirmation.appointmentDate}</span>
+                <div>
+                    <button onClick={this.closeModal}
+                        className="button">
+                        Close
+                    </button>
+                </div>
+            </div>
+        }
         return (
-            <div>
+            <div style={divStyle}>
                 <button onClick={this.openModal}
-                    className="button button-assertive">
-                        {this.props.assistanceType}
+                    className="button button-clear button-SOS">
+                    SOS
                 </button>
                 <Modal isOpen={this.state.modalIsOpen}
                     onRequestClose={this.closeModal}
                 >
-                    <div className="padding scroll-content ionic-scroll has-header">
-                        <div className="scroll">
-                            <h2>{this.state.assistanceInfo.header}</h2>
-                            Allianz can assist you anywhere you are.
-                            <h5>Service details</h5>
-                            <span>
-                            {this.state.assistanceInfo.description}
-                            </span>
-                            <h5> Service cost</h5>
-                            This service costs $
-                            <span>{this.state.assistanceInfo.price}</span>
-                            .
-                            An Allianz service personal will be sent to your location as soon as possible
-                            <div>
-                                <button onClick={this.confirmServiceRequest}
-                                    className="button button-positive">
-                                    Confirm service request
-                                </button>
-                                <button onClick={this.closeModal}
-                                    className="button">
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
+                    <div className="padding scroll-content ionic-scroll">
+                    {modalContents}
                     </div>
                 </Modal >
             </div>

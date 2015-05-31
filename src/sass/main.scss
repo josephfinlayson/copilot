@@ -1,6 +1,7 @@
 @import "../../bower_components/pure/pure.css";
 @import "../../bower_components/ionic/scss/ionic";
 @import "home";
+@import "health";
 
 #sos {
   @import "../../bower_components/bootstrap/dist/css/bootstrap.css";
@@ -52,17 +53,6 @@ $map-height: 500px;
   background-color: #465688;
 }
 
-//html {
-.ReactModal__Overlay--after-open {
-
-}
-
-//}
-
-.ReactModal__Overlay {
-  background-color: rgba(255, 255, 255, 0.75);
-}
-
 .bar.bar-header {
 	background-color: #1a343f !important;
 }
@@ -71,6 +61,7 @@ $map-height: 500px;
 	background-image: linear-gradient(to bottom, #D83832, #ac2b28) !important;
 	border-radius: 3px;
   width: 4em;
+  float: right;
 }
 
 .loading-txt {
@@ -81,16 +72,14 @@ $map-height: 500px;
 
 .ReactModal__Content {
   position: absolute;
-  z-index: 10;
-  top: 20%;
-  left: 20%;
-  right: 20%;
-  bottom: 20%;
-  padding: 20%;
+  z-index: 1000;
   border: 2px solid black;
   background: #fff;
-  border-radius: 4px;
   outline: none;
   padding: 20px;
 }
 
+.health-button {
+  width: 90%;
+  margin-left: 6%;
+}
