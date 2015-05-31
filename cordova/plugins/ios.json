@@ -19,6 +19,30 @@
                         {
                             "xml": "<preference name=\"StatusBarStyle\" value=\"lightcontent\" />",
                             "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"Geolocation\"><param name=\"ios-package\" value=\"CDVLocation\" /></feature>",
+                            "count": 1
+                        }
+                    ]
+                }
+            },
+            "framework": {
+                "parents": {
+                    "CoreLocation.framework": [
+                        {
+                            "xml": false,
+                            "count": 1
+                        }
+                    ]
+                }
+            },
+            "*-Info.plist": {
+                "parents": {
+                    "NSLocationWhenInUseUsageDescription": [
+                        {
+                            "xml": "<string />",
+                            "count": 1
                         }
                     ]
                 }
@@ -30,6 +54,9 @@
             "PACKAGE_NAME": "io.cordova.hellocordova"
         },
         "cordova-plugin-statusbar": {
+            "PACKAGE_NAME": "io.cordova.hellocordova"
+        },
+        "cordova-plugin-geolocation": {
             "PACKAGE_NAME": "io.cordova.hellocordova"
         }
     },
