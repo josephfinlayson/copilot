@@ -10,9 +10,16 @@ export default React.createClass({
     mixins: [Router.Navigation, Router.State],
     getInitialState() {
         console.log(this.getAssistanceType(this.getPathname()));
+        var assistanceTypeRequested;
+        if (this.props.assistanceType){
+            assistanceTypeRequested = this.props.assistanceType;
+        }
+        else {
+            assistanceTypeRequested = this.getPathname();
+        }
         return {
             modalIsOpen: false,
-            assistanceInfo: this.getAssistanceType(this.getPathname()) || {}
+            assistanceInfo: this.getAssistanceType(assistanceTypeRequested) || {}
         };
     },
     confirmServiceRequest() {

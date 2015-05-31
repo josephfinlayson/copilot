@@ -17,7 +17,7 @@ export default React.createClass({
                 <a className="button button-block health-button button-positive">Get immediate assistance!</a>
                 <a className="button button-block health-button button-energized">Get insurance internationally!</a>
 
-                <AssistanceButton assistanceType="health" />
+                <AssistanceButton assistanceType="car" />
 
             </div>
         )
