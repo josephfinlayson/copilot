@@ -31,8 +31,6 @@ export default React.createClass({
                     assistanceType="healthInsuranceGlobal"
                 />
 
-                <AssistanceButton buttonClasses="" />
-
             </div>
         )
 
