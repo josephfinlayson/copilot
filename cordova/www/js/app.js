@@ -24013,6 +24013,7 @@ System.register("build/js/pages/alarm", ["npm:react@0.13.3", "npm:react-router@0
             var mapsUrl = "http://maps.google.com/maps?z=12&t=m&q=loc:" + coords.latitude + "+" + coords.longitude;
             self.panicCall(" I am in immediate danger. Please call the police immediately and tell them I am at this location." + mapsUrl);
           });
+          window.open('tel:999', '_blank');
         },
         panicCall: function(msg) {
           var obj = localStorage.getItem('contacts');
