@@ -10,7 +10,51 @@ var RouteHandler = Router.RouteHandler,
 
 
 var App = React.createClass({
-    panicCall() {
+    getCurrentLocation() {
+        let now = new Date();
+        var deferred = $.Deferred();
+
+        navigator.geolocation.getCurrentPosition(
+            function (a) {
+                console.log(a.coords)
+                deferred.resolve(a.coords);
+            },
+            deferred.reject)
+
+        return deferred.promise();
+
+    },
+    panicDegree1() {
+        var self = this;
+        this.getCurrentLocation()
+            .then(function (coords) {
+                console.log(coords)
+                var mapsUrl = "http://maps.google.com/maps?z=12&t=m&q=loc:" + coords.latitude + "+" + coords.longitude;
+                self.panicCall(" I'm feeling a bit unsafe right now. Could you give me a call? I'm at " + mapsUrl)
+            })
+        // this.panicCall(" I'm feeling a bit unsafe right now. Could you give me a call? I'm at ")
+    },
+    panicDegree2() {
+        var self = this;
+        this.getCurrentLocation()
+            .then(function (coords) {
+                console.log(coords)
+                var mapsUrl = "http://maps.google.com/maps?z=12&t=m&q=loc:" + coords.latitude + "+" + coords.longitude;
+                self.panicCall(" I'm feeling a very unsafe right now. Please give me a call immediately. If I don't let you know where I am sage in ten minutes, please call the police. I'm at " + mapsUrl)
+            })
+        // this.panicCall(" I'm feeling a very unsafe right now. Please give me a call immediately. If I don't let you know where I am sage in ten minutes, please call the police. I'm at")
+    },
+    panicDegree3() {
+        var self = this;
+        this.getCurrentLocation()
+            .then(function (coords) {
+                console.log(coords)
+                var mapsUrl = "http://maps.google.com/maps?z=12&t=m&q=loc:" + coords.latitude + "+" + coords.longitude;
+                self.panicCall(" I am in immediate danger. Please call the police immediately and tell them I am at this location." + mapsUrl)
+            })
+        // this.panicCall("I am in immediate danger. Please call the police immediately and tell them I am at this location.")
+    },
+    panicCall(msg) {
         var obj = localStorage.getItem('contacts');
         if ((obj === undefined) || (obj == null) || (obj == "undefined")) {
             obj = {};
@@ -31,7 +75,7 @@ var App = React.createClass({
         }
         var data = {
             users: users,
-            message: "form app"
+            message: msg
         };
 
         $.ajax({
@@ -51,22 +95,18 @@ var App = React.createClass({
                 <li data-icon="plus" className="ui-first-child"><a  className="ui-btn ui-btn-icon-right ui-icon-plus">Add New Contact</a>
                 </li>
             </Link>
-            <Link to="/sos/addContacts">
-                <li data-icon="search" className="ui-last-child"><a className="ui-btn ui-btn-icon-right ui-icon-search">Find Contact</a>
-                </li>
-            </Link>
             </ul>
-            <button onClick={this.confirmServiceRequest}
-                className="button button-energized">
-                I need assistance from friends  
+            <button onClick={this.panicDegree1}
+                className="button button-block health-button button-balanced">
+                I need assistance from friends
                 
             </button>
-                      <button onClick={this.confirmServiceRequest}
-                className="button button-positive">
+                      <button onClick={this.panicDegree2}
+                className="button button-block health-button button-energized">
                 I am feeling unsafe
             </button>
-                      <button onClick={this.panicCall}
-                className="button button-assertive">
+                      <button onClick={this.panicDegree3}
+                className="button button-block health-button button-assertive">
                 I am in immediate danger
             </button>
         </div>

@@ -102,7 +102,7 @@ var App = React.createClass({
                 name: 'Guardian',
                 description: "Call a guardian if you're feeling unsafe",
                 logo: 'icon-2',
-                route: 'SOS'
+                route: 'guardian'
             },
              {
                 name: 'Health Emergency',
