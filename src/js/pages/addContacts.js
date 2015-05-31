@@ -1,7 +1,10 @@
 
 import React from 'react';
 
+import Router from 'react-router';
+
 var App = React.createClass({
+    mixins: [Router.Navigation, Router.State],
 	getInitialState() {
 		return {
 			name: '',
@@ -20,10 +23,16 @@ var App = React.createClass({
 			obj = {};
 		}
 		console.log('oldObject: ', obj);
-		obj = JSON.parse(obj)
+		try {
+			obj = JSON.parse(obj)
+		} catch (e) {
+			obj = {};
+		}
+		
 		obj[this.state.name] = this.state.number;
 		localStorage.setItem('contacts', JSON.stringify(obj));
 		console.log('newObject: ', obj);
+		this.goBack();
 	},
     render() {
         return (
